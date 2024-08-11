@@ -36,7 +36,7 @@
 					</a>
 					<ul class="dropdown-menu animated flipInX">
 						<li class="user-body">
-							<?php if (session()->get('type_user') == 'api') { ?>
+							<?php if(session()->get('type_user') == 'api') { ?>
 								<!-- <a class="dropdown-item" href="<?= base_url() ?>profile"><i class="ti-user text-muted mr-2"></i> Profile</a> -->
 							<?php } ?>
 							<div class="dropdown-divider"></div>

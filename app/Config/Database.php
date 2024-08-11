@@ -29,7 +29,7 @@ class Database extends Config
         'hostname'     => 'localhost',
         'username'     => 'sa',
         'password'     => '123',
-        'database'     => 'penomoran_drawing',
+        'database'     => 'cbi_mold',
         'DBDriver'     => 'sqlsrv',
         'DBPrefix'     => '',
         'pConnect'     => false,

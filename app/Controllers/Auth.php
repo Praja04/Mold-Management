@@ -2,27 +2,74 @@
 
 namespace App\Controllers;
 
+
 use App\Models\UserModel;
+use App\Models\AdminModel;
+
 
 class Auth extends BaseController
 {
     protected $users;
     protected $session;
     protected $client;
-
     public function __construct()
     {
         $this->users = new UserModel();
         $this->session = \Config\Services::session();
         $this->client = \Config\Services::curlrequest();
     }
-
     public function index()
     {
-        return view('login/signin');
+        return view('pages/login/signin');
     }
+    // public function login()
+    // {
+    //     $data = [];
 
-    public function proses_login()
+    //     if ($this->request->getPost()) {
+    //         // Validasi input
+    //         $rules = [
+    //             'username' => 'required',
+    //             'password' => 'required',
+    //         ];
+
+    //         if ($this->validate($rules)) {
+    //             $username = $this->request->getPost('username');
+    //             $password = $this->request->getPost('password');
+
+    //             // Buat instance model UserModel dan AdminModel
+    //             $userModel = new UserModel();
+    //             $adminModel = new AdminModel();
+
+    //             // Cari user dan admin berdasarkan username
+    //             $user = $userModel->where('username', $username)->first();
+    //             $admin = $adminModel->where('username', $username)->first();
+
+    //             // Periksa apakah login sebagai user atau admin berhasil
+    //             if ($user && password_verify($password, $user['password'])) {
+    //                 session()->set('user_nama', $user['username']);
+    //                 session()->set('user_id', $user['id']);
+    //                 session()->set('user_suplier', $user['suplier']);
+    //                 return redirect()->to(base_url('/dashboard'));
+    //             } elseif ($admin && password_verify($password, $admin['password'])) {
+    //                 session()->set('admin_nama', $admin['username']);
+    //                 session()->set('admin_id', $admin['id']);
+    //                 session()->set('admin_role', $admin['role']);
+    //                 return redirect()->to(base_url('/dashboard-admin'));
+    //             } else {
+    //                 session()->setFlashdata('gagal', 'Username atau password salah.');
+    //                 return redirect()->to(base_url('/'));
+    //             }
+    //         } else {
+    //             session()->setFlashdata('gagal', 'Silakan isi semua data yang diperlukan.');
+    //             return redirect()->to(base_url('/'));
+    //         }
+    //     }
+
+    //     return view('pages/login/signin', $data);
+    // }
+
+    public function login()
     {
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
@@ -42,40 +89,11 @@ class Auth extends BaseController
             $data = json_decode($body, true);
 
             if (!empty($data)) {
-                // Menentukan peran berdasarkan NPK
-                $npk_admin = 3650;
-                $npk_uploaders = [1028, 1637, 2872, 3399]; // Daftar NPK uploader
-
-                if ($data['npk'] == $npk_admin) {
-                    // Simpan data ke sesi dan tampilkan halaman pemilihan peran
-                    $this->session->set([
-                        'username' => $data['username'],
-                        'nama' => $data['nama'],
-                        'npk' => $data['npk'],
-                        'id_divisi' => $data['id_divisi'],
-                        'divisi' => $data['divisi'],
-                        'id_departement' => $data['id_departement'],
-                        'departement' => $data['departement'],
-                        'id_section' => $data['id_section'],
-                        'section' => $data['section'],
-                        'id_sub_section' => $data['id_sub_section'],
-                        'sub_section' => $data['sub_section'],
-                        'kode_jabatan' => $data['kode_jabatan'],
-                        'role' => 'admin',
-                        'is_login' => true
-                    ]);
-                    return redirect()->to(base_url('auth/pilih_role'));
-                } elseif (in_array($data['npk'], $npk_uploaders)) {
-                    $role = 'uploader';
-                } else {
-                    $role = 'reader';
-                }
-
-                // Menyimpan data ke sesi
                 $session_data = [
                     'username' => $data['username'],
-                    'nama' => $data['nama'],
-                    'npk' => $data['npk'],
+                    'admin_nama' => $data['nama'],
+                    'admin_id' => $data['npk'],
+                    'role' => 'admin',
                     'id_divisi' => $data['id_divisi'],
                     'divisi' => $data['divisi'],
                     'id_departement' => $data['id_departement'],
@@ -85,117 +103,83 @@ class Auth extends BaseController
                     'id_sub_section' => $data['id_sub_section'],
                     'sub_section' => $data['sub_section'],
                     'kode_jabatan' => $data['kode_jabatan'],
-                    'role' => $role,
                     'is_login' => true
                 ];
-
                 $this->session->set($session_data);
 
-                // Redirect berdasarkan peran
-                return $this->redirect_based_on_role($role);
+                return redirect()->to(base_url('dashboard-admin'));
             } else {
                 // Jika respons kosong, lakukan pengecekan login dari model lokal
                 $data = $this->users->cek_login($username, $password);
 
                 if (!empty($data)) {
-                    // Menentukan peran berdasarkan NPK
-                    $npk_admin = 3650;
-                    $npk_uploaders = [1028, 1637, 2872, 3399]; // Daftar NPK uploader
-
-                    if ($data['npk'] == $npk_admin) {
-                        $role = 'admin';
-                    } elseif (in_array($data['npk'], $npk_uploaders)) {
-                        $role = 'uploader';
-                    } else {
-                        $role = 'reader';
-                    }
-
-                    // Menyimpan data ke sesi
                     $session_data = [
                         'username' => $data['username'],
-                        'nama' => $data['nama'],
-                        'npk' => $data['npk'],
-                        'id_divisi' => $data['id_divisi'],
-                        'divisi' => $data['divisi'],
-                        'id_departement' => $data['id_departement'],
-                        'departement' => $data['departement'],
-                        'id_section' => $data['id_section'],
-                        'section' => $data['section'],
-                        'id_sub_section' => $data['id_sub_section'],
-                        'sub_section' => $data['sub_section'],
-                        'kode_jabatan' => $data['kode_jabatan'],
-                        'role' => $role,
+                        'user_nama' => $data['username'],
+                        'user_id' => $data['id'],
+                        'user_suplier' => $data['suplier'],
+                        'role' => 'user',
                         'is_login' => true
                     ];
-
                     $this->session->set($session_data);
 
-                    // Redirect berdasarkan peran
-                    return $this->redirect_based_on_role($role);
+                    return redirect()->to(base_url('dashboard'));
                 } else {
-                    // Respons dari model lokal juga kosong, kembali ke halaman login
-                    $this->session->setFlashdata('error', 'Username atau password salah.');
+                    // Jika login dari model lokal juga gagal
+                    session()->setFlashdata('gagal', 'Username atau password salah.');
                     return redirect()->to(base_url('/'));
                 }
             }
         } else {
-            // Respons tidak berhasil, tampilkan pesan kesalahan atau lakukan tindakan yang sesuai
-            $this->session->setFlashdata('error', 'Username atau password salah.');
+            // Jika login API gagal
+            session()->setFlashdata('gagal', 'Username atau password salah.');
             return redirect()->to(base_url('/'));
         }
     }
 
-    public function pilih_role()
+    public function register()
     {
+        return view('pages/login/signup'); // Ganti 'auth/register' dengan nama view registrasi yang sesuai
+    }
+
+    public function register_action()
+    {
+        $userModel = new UserModel();
+
         $username = $this->request->getPost('username');
-        $nama = $this->request->getPost('nama');
-        $npk = $this->request->getPost('npk');
-        $id_divisi = $this->request->getPost('id_divisi');
-        $divisi = $this->request->getPost('divisi');
-        $id_departement = $this->request->getPost('id_departement');
-        $departement = $this->request->getPost('departement');
-        $id_section = $this->request->getPost('id_section');
-        $section = $this->request->getPost('section');
-        $id_sub_section = $this->request->getPost('id_sub_section');
-        $sub_section = $this->request->getPost('sub_section');
-        $kode_jabatan = $this->request->getPost('kode_jabatan');
-
-        return view('login/pilih_role', [
-            'username' => $username,
-            'nama' => $nama,
-            'npk' => $npk,
-            'id_divisi' => $id_divisi,
-            'divisi' => $divisi,
-            'id_departement' => $id_departement,
-            'departement' => $departement,
-            'id_section' => $id_section,
-            'section' => $section,
-            'id_sub_section' => $id_sub_section,
-            'sub_section' => $sub_section,
-            'kode_jabatan' => $kode_jabatan
-        ]);
-    }
-
-
-    public function proses_pilih_role()
-    {
+        $password = $this->request->getPost('password');
         $role = $this->request->getPost('role');
+        $suplier = $this->request->getPost('suplier');
+        $address = $this->request->getPost('address');
 
-        $this->session->set('role', $role);
-
-        // Redirect berdasarkan peran
-        return $this->redirect_based_on_role($role);
-    }
-
-    private function redirect_based_on_role($role)
-    {
-        if ($role == 'admin') {
-            return redirect()->to(base_url('verifikasi'));
-        } elseif ($role == 'uploader') {
-            return redirect()->to(base_url('pdfnumber'));
-        } else {
-            return redirect()->to(base_url('listpdf'));
+        // Validasi input
+        if (empty($username) || empty($password) || empty($role) || empty($suplier) || empty($address)) {
+            session()->setFlashdata('gagal', 'Isi semua data!');
+            return redirect()->to(base_url('register'));
         }
+
+        // Cek apakah username sudah terdaftar
+        if ($userModel->where('username', $username)->countAllResults() > 0) {
+            session()->setFlashdata('gagal', 'Username sudah terdaftar, gunakan username lain.');
+            return redirect()->to(base_url('register'));
+        }
+
+        // Hash password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // Menyimpan data pengguna ke database
+        $userData = [
+            'username' => $username,
+            'password' => $hashedPassword,
+            'role' => $role,
+            'suplier' => $suplier,
+            'address' => $address
+        ];
+
+        $userModel->insert($userData);
+
+        session()->setFlashdata('sukses', 'Registrasi berhasil! Silakan login.');
+        return redirect()->to(base_url('login')); // Arahkan ke halaman login
     }
 
     public function logout()
