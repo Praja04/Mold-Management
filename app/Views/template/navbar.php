@@ -93,7 +93,7 @@
 	</section>
 
 </aside>
-<script src="<?= base_url() ?>/assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
+<script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
 <?php if (session()->get('role') == 'admin') : ?>
 	<script>
 		$(document).ready(function() {
