@@ -78,14 +78,14 @@
                                                         <?php if ($user['gambar_diperbaiki'] != null) : ?>
                                                             <?= $user['gambar_diperbaiki'] ?>
                                                         <?php else : ?>
-                                                            <p style="color: red;">Belum Datang</p>
+                                                            <p style="color: red;">Belum input</p>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
                                                         <?php if ($user['dokumen_pendukung'] != null) : ?>
                                                             <?= $user['dokumen_pendukung'] ?>
                                                         <?php else : ?>
-                                                            <p style="color: red;">Belum Datang</p>
+                                                            <p style="color: red;">Belum input</p>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>

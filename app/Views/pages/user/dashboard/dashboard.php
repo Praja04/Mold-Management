@@ -32,7 +32,7 @@
           </div>
         </div>
 
-        <div class="col-xl-1 col-md-6 col-12"></div>
+        <div class="col-xl-3 col-md-6 col-12"></div>
         <div class="col-xl-3 col-md-6 col-12">
           <div class="box bg-secondary-light pull-up">
             <div class="box-body">
@@ -50,24 +50,6 @@
             </div>
           </div>
         </div>
-
-        <!-- <div class="col-xl-3 col-md-6 col-12">
-          <div class="box bg-secondary-light pull-up">
-            <div class="box-body">
-              <div class="flex-grow-1">
-                <div class="d-flex align-items-center pe-2 justify-content-between">
-                  <div class="d-flex">
-                    <span class="badge badge-primary me-10">Address</span>
-                    <span class="badge badge-primary me-5"><i class="fa fa-map-marker"></i></span>
-                  </div>
-
-                </div>
-                <h4 class="mt-25 mb-5" id="posisimold"></h4>
-                <p class="text-fade mb-0 fs-12">Posisi Mold</p>
-              </div>
-            </div>
-          </div>
-        </div> -->
 
         <div class="col-xl-3 col-md-6 col-12">
           <div class="box bg-secondary-light pull-up">
@@ -87,9 +69,6 @@
           </div>
         </div>
 
-
-
-
         <div class="col-xl-12 col-lg-6 col-12">
           <div class="box">
             <div class="box-header with-border">
@@ -98,15 +77,48 @@
             <!-- /.box-header -->
             <div class="box-body">
               <div class="table-responsive">
-                <table id="example5" class="table table-bordered table-striped" style="width:100%">
+                <div class="text-center row mb-3">
+                  <div class="filter-buttons mb-3">
+                    <button class="btn btn-primary filter" data-filter="all">All</button>
+                    <button class="btn btn-primary filter" data-filter="container">Container</button>
+                    <button class="btn btn-primary filter" data-filter="cover">Cover</button>
+                    <button class="btn btn-primary filter" data-filter="other">Other</button>
+                  </div>
+                </div>
+                <table id="example5" class="table table-bordered table-striped text-center" style="width:100%">
                   <thead>
                     <tr>
                       <th>No</th>
                       <th>Nama Mold</th>
                       <th>Action</th>
+                      <th>Jumlah Produksi</th>
+                      <!-- <th>Jumlah Dikirim</th> -->
+                      <th>Report Harian</th>
+                      <th>Perbaikan Besar</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <?php $i = 1;
+                    foreach ($data as $items) : ?>
+                      <tr>
+                        <td><?= $i++; ?></td>
+                        <td><?= $items['ITEM'] ?></td>
+                        <td>
+                          <button class="daily-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="<?= $items['ITEM'] ?>" data-id="<?= $items['NO'] ?>">Report Harian</button>
+                          <button class="perbaikan-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="<?= $items['ITEM'] ?>" data-id="<?= $items['NO'] ?>">Perbaikan Besar</button>
+                        </td>
+                        <td>
+                          <?= number_format($items['jumlah_produk'], 0, ',', '.') ?>
+                        </td>
+                        <!-- <td>
+                          <?= number_format($items['total_jumlah_produk'], 0, ',', '.') ?>
+                        </td> -->
+
+                        <td><a class="btn btn-secondary" href="<?= base_url('history/report') ?>?namaMold=<?= urlencode($items['ITEM']) ?>"><span class="ti ti-eye"></a></td>
+                        <td><a class="btn btn-info" href="<?= base_url('history/perbaikan') ?>?namaMold=<?= urlencode($items['ITEM']) ?>"><span class="ti ti-eye"></a></td>
+
+                      </tr>
+                    <?php endforeach ?>
                   </tbody>
                 </table>
               </div>
@@ -116,24 +128,12 @@
           <!-- /.box -->
         </div>
       </div>
-
     </section>
     <!-- /.content -->
   </div>
 </div>
 <!-- /.content-wrapper -->
-<div class="modal" id="loading-modal" data-bs-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="background-color:rgba(0, 0, 0, 0.01);">
-      <div class="modal-body text-center">
-        <div class="spinner-border text-light" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <h5 class="mt-2 text-light">Loading...</h5>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
 <script>
@@ -141,13 +141,25 @@
 
   $(document).ready(function() {
     // Fetch and display user data
+
+    $('.filter').on('click', function() {
+      var filterValue = $(this).data('filter');
+
+      if (filterValue === 'all') {
+        table.column(1).search('').draw();
+      } else if (filterValue === 'other') {
+        table.column(1).search('^(?!.*(Container|Cover)).*$', true, false).draw();
+      } else {
+        table.column(1).search(filterValue, true, false).draw();
+      }
+    });
+
     $.ajax({
       url: baseUrl + 'user/data',
       type: 'GET',
       success: function(data) {
         const user = data.data_user;
         console.log(user);
-        $('#posisimold').text(user.address);
         $('#suplier').text(user.suplier);
         $('#nama').text('Welcome ' + user.username + ' !');
 
@@ -173,7 +185,7 @@
     // Initialize DataTable without search feature
     var table = $('#example5').DataTable({
       "paging": true,
-      "searching": false, // Disable search
+      "searching": true, // Disable search
       "ordering": true,
       "info": true,
       "language": {
@@ -186,32 +198,7 @@
         "processing": "Processing...",
         "zeroRecords": "No matching records found"
       }
-    });
 
-    $.ajax({
-      url: baseUrl + 'user/getsuplier',
-      method: 'GET',
-      dataType: 'json',
-      success: function(response) {
-        if (response.data && Array.isArray(response.data)) {
-          var data = response.data.map(function(item, index) {
-            return [
-              (index + 1).toString(), // Nomor urut sebagai string
-              item.ITEM, // Nama Mold
-              '<button class="daily-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="' + item.ITEM + '" data-id="' + item.NO + '">Report Harian</button>' +
-              '<button class="perbaikan-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="' + item.ITEM + '" data-id="' + item.NO + '">Perbaikan Besar</button>' 
-            ];
-          });
-
-          // Append rows to the table body
-          table.clear().rows.add(data).draw();
-        } else {
-          console.error('Invalid data format');
-        }
-      },
-      error: function(xhr, status, error) {
-        console.error('Error in AJAX request:', status, error);
-      }
     });
 
     $(document).on('click', '.daily-button', function() {
@@ -229,7 +216,7 @@
       window.location.href = url;
     });
 
-  
+
   });
 </script>
 

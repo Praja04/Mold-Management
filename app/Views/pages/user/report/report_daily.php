@@ -64,10 +64,19 @@
                                                 <option value="PP Samsung BJ520">PP Samsung BJ520</option>
                                                 <option value="PP Hyosung J640">PP Hyosung J640</option>
                                                 <option value="PP Basel EP400">PP Basel EP400</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-md-6" id="other-material-container" style="display:none;">
+                                        <div class="form-group">
+                                            <label class="form-label">Tentukan Materi Lainnya</label>
+                                            <input type="text" id="other-material" class="form-control" name="other_material" placeholder="Masukan material lainnya">
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div class="row">
                                     <br><br>
                                     <h4 class="box-title text-info mb-0 mt-20"><i class="ti-save me-15"></i>Hasil Produksi </h4>
@@ -134,6 +143,13 @@
         const baseUrl = '<?= base_url() ?>';
         const maxNgItems = 18;
         let ngCount = 1;
+        $('#material').change(function() {
+            if ($(this).val() === 'Other') {
+                $('#other-material-container').show();
+            } else {
+                $('#other-material-container').hide();
+            }
+        });
 
         function updatejenis(element) {
             $.ajax({
@@ -292,7 +308,11 @@
             formData.append('moldId', moldId);
             formData.append('nama_mold', $('#partname').val());
             formData.append('jumlah_ok', $('#jumlah_ok').val());
-            formData.append('material', $('#material').val());
+            let selectedMaterial = $('#material').val();
+            if (selectedMaterial === 'Other') {
+                selectedMaterial = $('#other-material').val();
+            }
+            formData.append('material', selectedMaterial);
             formData.append('tanggal_report', $('#tanggal_report').val());
             formData.append('problem_harian', $('#keterangan_problem').val());
 
@@ -351,7 +371,7 @@
                 success: function(response) {
                     if (response.message) {
                         showToast(response.message);
-                        setTimeout(() => location.reload(), 4000);
+                        setTimeout(() => window.location.href = ('<?= base_url('dashboard') ?>'), 2000);
                     } else if (response.error) {
                         showToast(response.error, true);
                     }

@@ -161,7 +161,7 @@
                 "orderData": [2, 3] // Order by 'Belum Dibaca' first, then 'Dibaca'
             }],
             "paging": true,
-            "searching": false, // Disable search
+            "searching": true, // Disable search
             "ordering": true,
             "info": true,
             "language": {

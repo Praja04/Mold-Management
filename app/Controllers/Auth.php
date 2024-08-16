@@ -155,17 +155,17 @@ class Auth extends BaseController
         // Validasi input
         if (empty($username) || empty($password) || empty($role) || empty($suplier) || empty($address)) {
             session()->setFlashdata('gagal', 'Isi semua data!');
-            return redirect()->to(base_url('register'));
+            return redirect()->to(base_url('register/suplier'));
         }
 
         // Cek apakah username sudah terdaftar
         if ($userModel->where('username', $username)->countAllResults() > 0) {
             session()->setFlashdata('gagal', 'Username sudah terdaftar, gunakan username lain.');
-            return redirect()->to(base_url('register'));
+            return redirect()->to(base_url('register/suplier'));
         }
 
         // Hash password
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $hashedPassword = password_hash((string)$password, PASSWORD_DEFAULT);
 
         // Menyimpan data pengguna ke database
         $userData = [
@@ -178,8 +178,8 @@ class Auth extends BaseController
 
         $userModel->insert($userData);
 
-        session()->setFlashdata('sukses', 'Registrasi berhasil! Silakan login.');
-        return redirect()->to(base_url('login')); // Arahkan ke halaman login
+        session()->setFlashdata('sukses', 'Registrasi berhasil!');
+        return redirect()->to(base_url('register/suplier')); // Kembali ke halaman register
     }
 
     public function logout()

@@ -11,7 +11,20 @@ class TransaksiJumlahProduk extends Model
   
     protected $allowedFields    = ['nama_mold','jumlah_produk','user_id','is_seen'];
 
+    public function getTotalJumlahProdukByMold($namaMold)
+    {
+        // Query to sum 'jumlah_produk' for a specific 'nama_mold'
+        $query = $this->db->query("
+        SELECT SUM(jumlah_produk) as total_jumlah_produk
+        FROM transaksi_produk
+        WHERE nama_mold = ?
+    ", [$namaMold]);
 
+        // Fetch the result and return the total sum
+        $result = $query->getRow();
+        return $result ? $result->total_jumlah_produk : 0;
+    }
+    
     public function countDataPerUser()
     {
         $builder = $this->db->table('users u')

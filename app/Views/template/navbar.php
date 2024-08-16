@@ -30,7 +30,7 @@
 								<li><a href="<?= base_url('report/perbaikan/besar') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Perbaikan Besar<span id="perbaikan_besar"></span></a></li>
 							</ul>
 						</li>
-						<li class="treeview">
+						<!-- <li class="treeview">
 							<a href="#">
 								<i class="icon-Layout-grid"><span class="path1"></span><span class="path2"></span></i>
 								<span>Verifikasi</span>
@@ -40,22 +40,47 @@
 							<ul class="treeview-menu">
 								<li><a href="<?= base_url('userlist') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Verifikasi Users Mold</a></li>
 								<li><a href="<?= base_url('form/verifikasi') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Form Verifikasi Mold</a></li>
-								<!-- <li><a href="<?php //base_url('/form_update') 
-													?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Form Update</a></li> -->
+							 <li><a href="<?php //base_url('/form_update') 
+											?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Form Update</a></li>
 							</ul>
-						</li>
-						<!-- <li class="treeview">
+						</li> -->
+						<li class="treeview">
 							<a href="#">
 								<i class="icon-Layout-grid"><span class="path1"></span><span class="path2"></span></i>
-								<span>Log Book</span>
+								<span>Registration</span>
+								<span class="pull-right-container">
+									<i class="fa fa-angle-right pull-right"></i>
+							</a>
+							<ul class="treeview-menu">
+								<li><a href="<?= base_url('register/suplier') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Register Supplier</a></li>
+								<li><a href="<?= base_url('register/new/mold') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>New Mold</a></li>
+								<!-- <li><a href="<?= base_url('register/suplier') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Pemindahan Mold</a></li> -->
+
+							</ul>
+						</li>
+						<li class="treeview">
+							<a href="#">
+								<i class="icon-Layout-grid"><span class="path1"></span><span class="path2"></span></i>
+								<span>Products Mold</span>
 								<span class="pull-right-container">
 									<i class="fa fa-angle-right pull-right"></i>
 
 							</a>
 							<ul class="treeview-menu">
-								<li><a href="<?= base_url('logbook/perbaikan') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Log Book Perbaikan</a></li>
-								<li><a href="<?= base_url('logbook/reject') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Log Book Reject Product</a></li>
-								</ul>
+								<!-- <li><a href="<?= base_url('logbook/perbaikan') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Log Book Perbaikan</a></li>
+								<li><a href="<?= base_url('logbook/reject') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Log Book Reject Product</a></li> -->
+								<li><a href="<?= base_url('products/mold') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>List Mold</a></li>
+							</ul>
+						</li>
+						<!-- <li class="header">Portal Penomoran Drawing</li>
+						<li class="">
+							<a href="https://portal3.incoe.astra.co.id/portal_pce/public/dashboard">
+								<i class="icon-File"><span class="path1"></span><span class="path2"></span></i>
+								<span>Admin Penomoran Drawing</span>
+								<span class="pull-right-container">
+									<i class="fa fa-angle-right pull-right"></i>
+
+							</a>
 						</li> -->
 					<?php else : ?>
 						<li class="treeview">
@@ -67,8 +92,8 @@
 							</a>
 							<ul class="treeview-menu">
 								<li><a href="<?= base_url('dashboard') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>User Dashboard</a></li>
-								<li><a href="<?= base_url('report') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Daily Report</a></li>
-								<li><a href="<?= base_url('user/perbaikan') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Perbaikan Besar</a></li>
+								<!-- <li><a href="<?= base_url('report') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Daily Report</a></li>
+								<li><a href="<?= base_url('user/perbaikan') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Perbaikan Besar</a></li> -->
 							</ul>
 						</li>
 
@@ -80,7 +105,7 @@
 									<i class="fa fa-angle-right pull-right"></i>
 							</a>
 							<ul class="treeview-menu">
-								<li><a href="<?= base_url('pengajuan/harian') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Report Harian <span id="notif_report"></a></li>
+								<!-- <li><a href="<?= base_url('pengajuan/harian') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Report Harian <span id="notif_report"></a></li> -->
 								<li><a href="<?= base_url('pengajuan/perbaikan') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Perbaikan Besar <span id="notif_perbaikan"></a></li>
 							</ul>
 						</li>

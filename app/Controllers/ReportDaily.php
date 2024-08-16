@@ -180,10 +180,15 @@ class ReportDaily extends BaseController
 
 
 
-
     public function showAccumulatedShots()
     {
-        $data['accumulatedShots'] = $this->reportPerbaikan->getAccumulatedShots();
+        $data['accumulatedShots'] = $this->reportPerbaikan->getTotalByMold();
+
+        return $this->response->setJSON($data);
+    }
+    public function showAccumulatereport()
+    {
+        $data['jumlah_report'] = $this->moldTotalProduk->getTotalReportByMold();
 
         return $this->response->setJSON($data);
     }
@@ -306,5 +311,11 @@ class ReportDaily extends BaseController
         $item = '';
         $data = $this->reportPerbaikan->getReportMold($item);
         return $this->response->setJSON(['data' => $data]);
+    }
+
+    public function getrejectionBySuplier()
+    {
+        $data['reject']= $this->reportPerbaikan->getUserCategoryTotals();
+        return $this->response->setJSON($data);
     }
 }

@@ -7,7 +7,6 @@ use App\Models\UserModel;
 use App\Models\MoldItemModel;
 use App\Models\DetailMold;
 use App\Models\PerbaikanBesarModel;
-use App\Models\RejectMoldModel;
 use App\Models\TransaksiJumlahProduk;
 use App\Models\SupplierModel;
 
@@ -27,7 +26,7 @@ class Admin extends BaseController
 
         $model = new SupplierModel();
         if ($model->updateJumlahProduk($id, $jumlah)) {
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Jumlah produk berhasil diupdate untuk entri ' ]);
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Jumlah produk berhasil diupdate untuk entri ']);
         } else {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal mengupdate jumlah produk untuk entri  ']);
         }
@@ -49,8 +48,7 @@ class Admin extends BaseController
             session()->setFlashdata('gagal', 'Anda belum login');
             return redirect()->to(base_url('/'));
         }
-        $password = 'NATAMAS123';
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
         $namaAdmin = session()->get('admin_nama');
         $moldItemModel = new MoldItemModel();
         $suplier = new UserModel();
@@ -61,16 +59,12 @@ class Admin extends BaseController
         // Meneruskan data ke tampilan
         $Data['items'] = $items;
         $Data['suplier'] = $suplier;
-        $TotalReject = new RejectMoldModel();
         $TotalItems = new MoldItemModel();
         $TotalUser = new UserModel();
         $GetTotalItem = $TotalItems->TotalAllItems();
-        $GetTotalReject = $TotalReject->TotalAllItems();
         $GetTotalUser = $TotalUser->TotalUser();
         $Data['totalItem'] = $GetTotalItem;
-        $Data['PASSWORD'] = $hashed_password;
         $Data['totalUser'] = $GetTotalUser;
-        $Data['totalReject'] = $GetTotalReject;
         $Data['adminName'] = $namaAdmin;
 
         return view('pages/admin/dashboard/dashboard', $Data);
@@ -131,7 +125,7 @@ class Admin extends BaseController
             ->where('permanen', null)
             ->orderBy('created_at', 'DESC')
             ->findAll();
-       
+
         return view('pages/admin/perbaikan_besar/detail_perbaikan_no', $moldData);
     }
     public function perbaikanBesar_detail_yes()
@@ -149,7 +143,7 @@ class Admin extends BaseController
             ->where('permanen', null)
             ->orderBy('created_at', 'DESC')
             ->findAll();
-       
+
         return view('pages/admin/perbaikan_besar/detail_perbaikan_yes', $moldData);
     }
     public function perbaikanBesar_detail()
@@ -241,9 +235,9 @@ class Admin extends BaseController
         $dataUser['data'] = $items;
         return view('pages/admin/logbook/logbook_mold', $dataUser);
     }
-   
 
-   
+
+
 
     public function Form_Verifikasi()
     {
@@ -308,7 +302,7 @@ class Admin extends BaseController
         $nama_mold = $this->request->getGet('namaMold');
         // Lakukan query untuk mengambil data mold berdasarkan User_ID
         $moldData['moldData'] = $moldDetail->where('Part_Name', $nama_mold)
-            ->orderBy('Tanggal_Update', 'DESC')
+            ->orderBy('created_at', 'DESC')
             ->first();
         $moldItems = $moldItem->getAllByPartname($nama_mold);
         $moldData['Item'] = $moldItems[0];
@@ -341,59 +335,6 @@ class Admin extends BaseController
         return $this->response->setJSON($moldData);
     }
 
-    //acc dan not acc
-    public function updateHasilVerifikasi()
-    {
-        $moldModel = new DetailMold();
-        $moldID = $this->request->getPost('moldID');
-        $file = $this->request->getFile('verifikasi_pdf');
-
-        if (!$file->isValid()) {
-            return $this->response->setStatusCode(400, 'File not valid');
-        }
-
-        try {
-            if (!$file->hasMoved()) {
-                $filename = $file->getRandomName();
-                $file->move(ROOTPATH . 'public/uploads', $filename);
-
-                $datamold = [
-                    'Hasil_Verifikasi' => $filename
-                ];
-                $moldModel->update($moldID, $datamold);
-
-                return $this->response->setJSON(['message' => 'Data submitted successfully!']);
-            } else {
-                return $this->response->setStatusCode(400)->setJSON(['error' => 'File has already been moved!']);
-            }
-        } catch (\Exception $e) {
-            log_message('error', 'File upload error: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON(['error' => 'Error: ' . $e->getMessage()]);
-        }
-    }
-
-
-    public function updateHasilVerifikasi2($moldID)
-    {
-        // Panggil model untuk melakukan update hasil verifikasi
-        $moldModel = new DetailMold();
-        $data = [
-            'Hasil_Verifikasi' => 2 // Ubah hasil verifikasi 
-        ];
-        $result = $moldModel->update($moldID, $data);
-        // Buat respons JSON
-        $response = array();
-        if ($result) {
-            $response['success'] = true;
-            $response['message'] = 'Perubahan berhasil disimpan.';
-        } else {
-            $response['success'] = false;
-            $response['message'] = 'Gagal menyimpan perubahan.';
-        }
-
-        // Kembalikan respons sebagai JSON
-        return $this->response->setJSON($response);
-    }
 
     //submit form verifikasi
     public function submit_verifikasi()
@@ -407,54 +348,39 @@ class Admin extends BaseController
             $moldModel = new DetailMold();
 
             // Ambil file PDF yang diunggah
-            $lampiran_drawing = $this->request->getFile('drawing_produk');
+            //$lampiran_drawing = $this->request->getFile('drawing_produk');
             $gambar_mold = $this->request->getFile('gambar_mold');
-            $gambar_part = $this->request->getFile('gambar_part');
-            $gambar_runner = $this->request->getFile('gambar_runner');
+            // $gambar_part = $this->request->getFile('gambar_part');
+            // $gambar_runner = $this->request->getFile('gambar_runner');
 
             // Validasi file PDF
-            if ($lampiran_drawing->isValid() && !$lampiran_drawing->hasMoved() && $lampiran_drawing->getExtension() === 'pdf') {
+            if ($gambar_mold->isValid() && !$gambar_mold->hasMoved()) {
                 // Pindahkan file PDF ke direktori yang tepat
-                $drawingname = $lampiran_drawing->getRandomName();
-                $lampiran_drawing->move(ROOTPATH . 'public/uploads', $drawingname);
+                // $drawingname = $lampiran_drawing->getRandomName();
+                // $lampiran_drawing->move(ROOTPATH . 'public/uploads', $drawingname);
 
                 $gambarmold = $gambar_mold->getRandomName();
                 $gambar_mold->move(ROOTPATH . 'public/uploads', $gambarmold);
 
-                $gambarpart = $gambar_part->getRandomName();
-                $gambar_part->move(ROOTPATH . 'public/uploads', $gambarpart);
+                // $gambarpart = $gambar_part->getRandomName();
+                // $gambar_part->move(ROOTPATH . 'public/uploads', $gambarpart);
 
-                $gambarRunner = $gambar_runner->getRandomName();
-                $gambar_runner->move(ROOTPATH . 'public/uploads', $gambarRunner);
+                // $gambarRunner = $gambar_runner->getRandomName();
+                // $gambar_runner->move(ROOTPATH . 'public/uploads', $gambarRunner);
 
-                // detail_mold
+
                 $datamold = [
                     'User_ID' => $this->request->getPost('user_id'),
                     'Mold_Id' => $this->request->getPost('moldIdContent'),
                     'Part_Name' => $this->request->getPost('partname'),
-                    'Gambar_Mold' =>  $gambarmold,
-                    'Deskripsi_Mold' => $this->request->getPost('deskripsi_mold'),
-                    'Gambar_Part' => $gambarpart,
-                    'Deskripsi_Part' => $this->request->getPost('deskripsi_part'),
-                    'Gambar_Runner' => $gambarRunner,
-                    'Deskripsi_Runner' => $this->request->getPost('deskripsi_runner'),
-                    'Tanggal_Update' => $this->request->getPost('tanggal_update'),
-                    'Posisi_Mold' => $this->request->getPost('posisi_mold'),
-                    'Drawing_Produk' => $drawingname,
-                    'Subject_Mold' => $this->request->getPost('subject_mold'),
-                    'Subject_Tool' => $this->request->getPost('tools'),
-                    'Subject_Mesin' => $this->request->getPost('mesin'),
-                    'Subject_Produk' => $this->request->getPost('produk'),
-                    'Subject_Proses' => $this->request->getPost('proses'),
-                    'Subcount_Suplier' => $this->request->getPost('subcount'),
-                    'Validasi_Ke' => $this->request->getPost('verif_ke'),
-                    'LK3' => $this->request->getPost('lk3'),
-                    'Spesifikasi' => $this->request->getPost('spek'),
-                    'Hasil_Verifikasi' => 0
+                    'Gambar_Mold' =>  $gambarmold
+                    // 'Gambar_Part' => $gambarpart,
+                    // 'Gambar_Runner' => $gambarRunner,
+                    // 'Drawing_Produk' => $drawingname
                 ];
 
                 $moldModel->save($datamold);
-                
+
 
 
                 return $this->response->setJSON(['message' => 'Data submitted successfully!']);
@@ -463,10 +389,50 @@ class Admin extends BaseController
                 return $this->response->setJSON(['error' => 'Invalid or non-PDF file uploaded!']);
             }
         } catch (\Exception $e) {
-            // Tangkap dan cetak pesan kesalahan
             return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
     }
+   public function update_data_mold()
+    {
+        if (session()->get('admin_nama') == '') {
+            session()->setFlashdata('gagal', 'Anda belum login');
+            return redirect()->to(base_url('/'));
+        }
+
+        try {
+            $moldModel = new MoldItemModel();
+            $id = $this->request->getPost('id');
+
+            // Cek apakah ID valid
+            $existingMold = $moldModel->find($id);
+            if (!$existingMold) {
+                return $this->response->setJSON(['error' => 'ID tidak ditemukan']);
+            }
+
+            $datamold = [
+                'Material' => $this->request->getPost('material'),
+                'PART' => $this->request->getPost('part'),
+                'CYCLE_TIME' => $this->request->getPost('cycle_time'),
+                'CAVITY' => $this->request->getPost('cavity'),
+                'TONNAGE' => $this->request->getPost('tonase'),
+                'DIMENSI_MOLD' => $this->request->getPost('dimensi'),
+                'CORE' => $this->request->getPost('core')
+            ];
+
+            // Debugging: Log data yang akan diupdate
+            log_message('info', 'Updating mold with ID: ' . $id);
+            log_message('info', 'Data to update: ' . print_r($datamold, true));
+
+            // Lakukan update
+            $moldModel->update($id, $datamold);
+
+            return $this->response->setJSON(['message' => 'Data submitted successfully!']);
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
     public function getItemsBySupplier()
     {
         $supplierId = $this->request->getGet('supplier');
@@ -480,5 +446,116 @@ class Admin extends BaseController
         return $this->response->setJSON(['error' => 'ID tidak valid']);
     }
 
-   
+    public function register_suplier()
+    {
+        if (session()->get('admin_nama') == '') {
+            session()->setFlashdata('gagal', 'Anda belum login');
+            return redirect()->to(base_url('/'));
+        }
+        return view('pages/admin/registration/register_suplier',);
+    }
+    public function register_new_mold()
+    {
+        if (session()->get('admin_nama') == '') {
+            session()->setFlashdata('gagal', 'Anda belum login');
+            return redirect()->to(base_url('/'));
+        }
+        $supplier = new UserModel();
+        $data['suppliers'] = $supplier->getUser();
+        return view('pages/admin/registration/new_mold', $data);
+    }
+
+    public function register_mold()
+    {
+        // Cek apakah user sudah login
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+
+        $supplierModel = new SupplierModel();
+        $moldItem = new MoldItemModel();
+
+        // Mengambil data dari form
+        $postData = $this->request->getPost([
+            'ITEM', 'MADE_IN', 'STATUS', 'Material', 'TONNAGE', 'PART',
+            'RUNNER', 'CYCLE_TIME', 'DIMENSI_MOLD', 'CAVITY', 'CORE', 'KETERANGAN', 'supplier'
+        ]);
+
+        // Validasi input
+        if (in_array('', $postData)) {
+            return $this->setAndRedirect('gagal', 'Isi semua data!');
+        }
+
+        // Cek apakah ITEM sudah terdaftar
+        if ($moldItem->where('ITEM', $postData['ITEM'])->countAllResults() > 0) {
+            return $this->setAndRedirect('gagal', 'Nama Mold sudah terdaftar, gunakan Nama lain.');
+        }
+
+        // Mendapatkan NO terakhir
+        $lastNo = $moldItem->selectMax('NO')->first();
+        $newNo = isset($lastNo['NO']) ? $lastNo['NO'] + 1 : 1;
+
+        // Menyimpan data mold ke database dengan NO baru
+        $postData['NO'] = $newNo;
+        $moldItem->insert($postData);
+        //  $newID = $moldItem->insertID();
+
+        // Menyimpan data supplier ke database
+        $supplierModel->insert([
+            'tahun' => date('Y'),
+            'suplier' => $postData['supplier'],
+            'id_mold' => $newNo,
+            'mold_name' => $postData['ITEM'],
+            'jumlah_produk' => 0
+        ]);
+
+        return $this->setAndRedirect('sukses', 'Registrasi berhasil!');
+    }
+
+    public function all_product_mold()
+    {
+        // Cek apakah user sudah login
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        $moldItem = new MoldItemModel();
+        $data['molds'] = $moldItem->getAllItems();
+        return view('pages/admin/list_mold/all_product_mold', $data);
+    }
+    public function detail_mold()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        $mold = new MoldItemModel();
+        $detail = new DetailMold();
+        $jumlah = new SupplierModel();
+        $report = new ReportModel();
+        $perbaikan = new PerbaikanBesarModel();
+        $nama_mold = $this->request->getGet('namaMold');
+        $result = $mold->getDataByItem($nama_mold);
+        // Memisahkan data mold dan suplier untuk efisiensi
+        $data['detail'] = $detail->getLatestByPartName($nama_mold);
+        $data['moldData'] = $result['moldData'];
+        $data['suplierData'] = $result['suplierData'];
+        $data['userData'] = $result['userData'];
+        $data['jumlah'] = $jumlah->getjumlahByMoldName($nama_mold);
+        $data['report'] = $report->countDailyReportsByMold($nama_mold);
+        $data['report'] = $report->countDailyReportsByMold($nama_mold);
+        $data['perbaikan'] = $perbaikan->countPerbaikanBesarByMold($nama_mold);
+        return view('pages/admin/list_mold/detail_mold', $data);
+    }
+
+    //private function
+    private function setAndRedirect($status, $message)
+    {
+        session()->setFlashdata($status, $message);
+        return redirect()->to(base_url('register/new/mold'));
+    }
+
+    private function redirectLogin()
+    {
+        session()->setFlashdata('gagal', 'Anda belum login');
+        return redirect()->to(base_url('/'));
+    }
 }

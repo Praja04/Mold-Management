@@ -2,11 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Models\DetailMold;
 use App\Models\MoldItemModel;
 use App\Models\UserModel;
 use App\Models\PerbaikanBesarModel;
-use App\Models\RejectMoldModel;
 use App\Models\ReportModel;
 use App\Models\SupplierModel;
 use App\Models\TransaksiJumlahProduk;
@@ -110,9 +108,9 @@ class User extends BaseController
             return redirect()->to(base_url('/'));
         }
         $reportModel = new ReportModel();
-        $transaksi= new TransaksiJumlahProduk();
+        $transaksi = new TransaksiJumlahProduk();
         $nama_mold = $this->request->getGet('namaMold');
-        $history['transaksiReport']= $transaksi->getTransaksiByMoldName($nama_mold);
+        $history['transaksiReport'] = $transaksi->getTransaksiByMoldName($nama_mold);
         $history['historyReport'] = $reportModel->getReportsByMoldName($nama_mold);
         return view('pages/user/pengajuan/report_daily/detail_pengajuan_harian', $history);
     }
@@ -223,18 +221,6 @@ class User extends BaseController
         return view('pages/user/perbaikan/perbaikan_logbook', $data);
     }
 
-    public function logBook_reject()
-    {
-        if (session()->get('user_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
-        }
-        $userId = session()->get('user_id');
-        $model = new RejectMoldModel();
-        $data['data'] = $model->getAllLogbook($userId);
-
-        return view('pages/user/reject/reject_logbook', $data);
-    }
 
     public function notif_perbaikan()
     {
@@ -323,7 +309,10 @@ class User extends BaseController
             session()->setFlashdata('gagal', 'Anda belum login');
             return redirect()->to(base_url('/'));
         }
-        return view('pages/user/dashboard/dashboard');
+        $supplier = new SupplierModel();
+        $username = session()->get('user_suplier');
+        $items['data'] = $supplier->getSupplierDataWithMoldItems($username);
+        return view('pages/user/dashboard/dashboard',$items);
     }
 
 
@@ -343,10 +332,8 @@ class User extends BaseController
 
         // Instansiasi model UserModel
         $formModel = new UserModel();
-        $detail = new DetailMold();
         // Panggil fungsi dari model untuk mendapatkan data berdasarkan User_ID
         $userData['data_user'] = $formModel->getUserByUsername($userId);
-        $userData['By_id'] = $detail->getDataByUserId($userId);
 
         // Periksa apakah data ditemukan
         if ($userData) {

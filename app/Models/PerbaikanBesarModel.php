@@ -29,6 +29,13 @@ class PerbaikanBesarModel extends Model
         'created_at'
     ];
 
+    public function countPerbaikanBesarByMold($nama_mold)
+    {
+        return $this->where('nama_mold', $nama_mold)
+            ->countAllResults();
+    }
+  
+
     public function getPerbaikanByMoldName($moldName)
     {
         return $this->where('nama_mold', $moldName)

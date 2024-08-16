@@ -24,7 +24,6 @@
                                                 <th rowspan="2">Jumlah OK</th>
                                                 <th rowspan="2">Jumlah NG</th>
                                                 <th rowspan="2">Problem Harian</th>
-                                                <th rowspan="2">Status</th>
                                                 <th colspan="18" class="text-center">Jenis Reject</th>
                                             </tr>
                                             <tr>
@@ -48,7 +47,6 @@
                                                 <th>Bushing</th>
                                             </tr>
                                         </thead>
-                                        
                                         <tbody>
                                             <?php if (isset($historymoldData) && is_iterable($historymoldData) && !empty($historymoldData)) : ?>
                                                 <?php $i = 1; ?>
@@ -61,9 +59,7 @@
                                                         <td>
                                                             <?= $user['problem_harian'] != null ? esc($user['problem_harian']) : '<p>-</p>' ?>
                                                         </td>
-                                                        <td>
-                                                            <?= $user['is_seen'] != 'no' ? '<p style="color: green;">Dilihat</p>' : '<p style="color: red;">Belum Dilihat</p>' ?>
-                                                        </td>
+                                                        
                                                         <td><?= esc($user['setup_mesin']); ?></td>
                                                         <td><?= esc($user['cuci_barel']); ?></td>
                                                         <td><?= esc($user['cuci_mold']); ?></td>
@@ -126,13 +122,13 @@
 <script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
-        $('#example5').DataTable({
-            // You can add additional configuration options here if needed
-            "paging": true, // Enable pagination
-            "searching": true, // Enable search functionality
-            "info": true, // Show table information
-            "lengthChange": true // Allow the user to change the number of rows displayed
-        });
+        // $('#example5').DataTable({
+        //     // You can add additional configuration options here if needed
+        //     "paging": true, // Enable pagination
+        //     "searching": true, // Enable search functionality
+        //     "info": true, // Show table information
+        //     "lengthChange": true // Allow the user to change the number of rows displayed
+        // });
         $('#example6').DataTable({
             // You can add additional configuration options here if needed
             "paging": true, // Enable pagination

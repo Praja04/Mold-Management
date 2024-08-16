@@ -12,6 +12,7 @@ class MoldItemModel extends Model
     protected $table            = 'mold_item';
     protected $primaryKey       = 'NO';
     protected $allowedFields = [
+        'NO',
         'ITEM',
         'MADE_IN',
         'STATUS',
@@ -60,7 +61,9 @@ class MoldItemModel extends Model
 
     public function getAllItems()
     {
-        return $this->findAll();
+        return $this->select('mold_item.*, suplier.suplier')
+        ->join('suplier', 'mold_item.ITEM = suplier.mold_name', 'left')
+        ->findAll();
     }
 
     public function TotalAllItems()
@@ -241,5 +244,34 @@ class MoldItemModel extends Model
         return $results;
     }
 
-  
+    public function getDataByItem($itemName)
+    {
+        // Dapatkan semua data dari tabel mold_item berdasarkan ITEM
+        $moldData = $this->where('ITEM', $itemName)->findAll();
+
+        // Dapatkan nama suplier dari tabel suplier berdasarkan mold_name yang sesuai dengan ITEM
+        $suplierModel = new \App\Models\SupplierModel();
+        $userModel = new UserModel();
+        $suplierData = $suplierModel->select('suplier')->where('mold_name', $itemName)->findAll();
+        $userData = [];
+
+        // Fetch user IDs based on suplier values
+        foreach ($suplierData as $suplier) {
+            $users = $userModel->select('id')
+            ->where('suplier', $suplier['suplier'])
+                ->findAll();
+            // Add user IDs to the userData array
+            foreach ($users as $user) {
+                $userData[] = $user['id'];
+            }
+        }
+
+        return [
+            'moldData' => $moldData,
+            'suplierData' => $suplierData,
+            'userData' => $userData
+        ];
+    }
+
+    
 }

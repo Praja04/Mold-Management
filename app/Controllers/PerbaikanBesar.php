@@ -4,12 +4,20 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\PerbaikanBesarModel;
-use App\Models\RejectMoldModel;
 use App\Models\short_akumulasiModel;
 use App\Models\MoldItemModel;
+use App\Models\SupplierModel;
 
 class PerbaikanBesar extends BaseController
 {
+    
+    public function showAccumulatePerbaikan()
+    {
+        $model = new SupplierModel();
+        $data['jumlah_perbaikan'] = $model->getTotalPerbaikanByMold();
+
+        return $this->response->setJSON($data);
+    }
     public function getLatestData()
     {
         if (session()->get('user_nama') == '') {

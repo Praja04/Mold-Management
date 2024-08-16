@@ -39,15 +39,21 @@ class ReportModel extends Model
         'bushing',
         'problem_harian'
     ];
-
-    public function getAccumulatedShots()
+    public function getUserCategoryTotals()
     {
-        $builder = $this->db->table($this->table);
-        $builder->select('nama_mold, SUM(jumlah_ok) as total_ok, SUM(jumlah_ng) as total_ng, (SUM(jumlah_ok) + SUM(jumlah_ng)) as akumulasi_shot');
-        $builder->groupBy('nama_mold');
+        $builder = $this->db->table('report_daily');
+        $builder->select('users.suplier, 
+                      SUM(report_daily.jumlah_ng) as total_jumlah_ng');
+        $builder->join('users', 'users.id = report_daily.user_id');
+        $builder->groupBy('users.suplier');
 
-        $query = $builder->get();
-        return $query->getResult();
+        return $builder->get()->getResultArray();
+    }
+    public function getTotalByMold()
+    {
+        return $this->select('nama_mold, SUM(jumlah_ok) as total_ok, SUM(jumlah_ng) as total_ng, (SUM(jumlah_ok) + SUM(jumlah_ng)) as total')
+        ->groupBy('nama_mold')
+        ->findAll();
     }
 
     public function getReportsByMoldName($moldName)
@@ -163,4 +169,18 @@ class ReportModel extends Model
             ->getRowArray();
     }
 
+    public function countDailyReportsByMold($nama_mold)
+    {
+        return $this->where('nama_mold', $nama_mold)
+            ->where('problem_harian !=', '-')
+            ->countAllResults();
+    }
+
+    public function getNGByMoldName($moldName)
+    {
+        return $this->select('setup_mesin,cuci_barel,cuci_mold,unfil,bubble,crack,blackdot,undercut,belang,scratch,ejector_mark,flashing,bending,weldline,sinkmark,silver,flow_material,bushing')
+            ->where('nama_mold', $moldName)
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
+    }
 }

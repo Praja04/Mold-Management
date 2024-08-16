@@ -8,25 +8,22 @@ class DetailMold extends Model
 {
     protected $table = 'detail_mold';
     protected $primaryKey = 'Id';
-    protected $allowedFields = ['Mold_Id', 'User_ID', 'Part_Name', 'Gambar_Mold', 'Deskripsi_Mold', 'Gambar_Part', 'Deskripsi_Part', 'Gambar_Runner', 'Deskripsi_Runner', 'Tanggal_Update', 'Posisi_Mold', 'Drawing_Produk', 'Subject_Mold', 'Subject_Tool', 'Subject_Mesin', 'Subject_Produk', 'Subject_Proses', 'Subcount_Suplier', 'Validasi_Ke', 'LK3', 'Spesifikasi', 'Hasil_Verifikasi'];
+    protected $allowedFields = ['Mold_Id', 'User_ID', 'Part_Name', 'Gambar_Mold', 'Deskripsi_Mold', 'Gambar_Part', 'Deskripsi_Part', 'Gambar_Runner', 'Deskripsi_Runner', 'Tanggal_Update', 'Posisi_Mold', 'Drawing_Produk', 'Subject_Mold', 'Subject_Tool', 'Subject_Mesin', 'Subject_Produk', 'Subject_Proses', 'Subcount_Suplier', 'Validasi_Ke', 'LK3', 'Spesifikasi', 'Hasil_Verifikasi','created_at'];
     protected $useAutoIncrement = true;
     protected $useTimestamps = false;
 
-    public function countHasilVerifikasiByItem($item)
+    public function getLatestByPartName($partName)
     {
-        $query = $this->select('detail_mold.Hasil_Verifikasi')
-        ->join('mold_item', 'detail_mold.Part_Name = mold_item.ITEM', 'left')
-        ->where('mold_item.ITEM', $item)
-        ->where('detail_mold.Hasil_Verifikasi', '0')
-        ->countAllResults(); // Menghitung jumlah hasil verifikasi
-
-        return $query;
+        // Fetch the latest record based on Part_Name and Tanggal_Update
+        return $this->where('Part_Name', $partName)
+            ->orderBy('created_at', 'DESC') // Order by Tanggal_Update in descending order
+            ->first(); // Get the first result (most recent one)
     }
-
+ 
     public function getDataByUserId($userId)
     {
         return $this->where('User_ID', $userId)
-            ->orderBy('Tanggal_Update', 'DESC')
+            ->orderBy('created_at', 'DESC')
             ->first();
     }
 
