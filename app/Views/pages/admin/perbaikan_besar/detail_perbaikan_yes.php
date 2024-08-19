@@ -69,7 +69,7 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <?php if ($user['visit'] != 0) : ?>
+                                                        <?php if ($user['gambar_diperbaiki'] != null) : ?>
                                                             <?php if ($user['dokumen_pendukung'] != null) : ?>
 
                                                                 <button type="button" class="btn btn-link btn-image-modal2" data-pdf="<?= base_url('uploads/' . $user['dokumen_pendukung']); ?>">
@@ -82,11 +82,11 @@
                                                                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-left" data-id-perbaikan-dokumen="<?= $user['id_perbaikan'] ?>">Upload Dokumen</button>
                                                             <?php endif; ?>
                                                         <?php else : ?>
-                                                            Belum Visit
+                                                            Belum Upload Gambar
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <?php if ($user['visit'] != 0) : ?>
+                                                        <?php if ($user['dokumen_pendukung'] != null) : ?>
                                                             <?php if ($user['temporary'] != null && $user['permanen'] != null) : ?>
 
                                                                 <?php if ($user['temporary'] == 'yes'  && $user['permanen'] == 'no') : ?>
@@ -99,7 +99,7 @@
                                                                 <a style="margin: 5px;" class="btn btn-success status-permanen-btn" data-id="<?= $user['id_perbaikan']; ?>">Permanen</a>
                                                             <?php endif; ?>
                                                         <?php else : ?>
-                                                            Belum Visit
+                                                            Belum Upload
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>

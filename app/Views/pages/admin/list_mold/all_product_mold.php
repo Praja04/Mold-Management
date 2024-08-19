@@ -58,6 +58,7 @@
                                     <thead>
                                         <tr>
                                             <th>No</th>
+                                            <th>Gambar</th>
                                             <th>Nama Mold</th>
                                             <th>Supplier</th>
                                             <th>Made In</th>
@@ -73,6 +74,15 @@
                                         foreach ($molds as $mold) : ?>
                                             <tr>
                                                 <td><?= $i++; ?></td>
+                                                <td>
+                                                    <?php if (!empty($mold['Gambar_Mold'])) : ?>
+                                                        <a href="<?= base_url('detail/mold') ?>?namaMold=<?= urlencode($mold['ITEM']) ?>">
+                                                            <img src="<?= base_url('uploads/' . $mold['Gambar_Mold']) ?>" alt="" width="80" />
+                                                        </a>
+                                                    <?php else :  ?>
+                                                        Belum ada gambar
+                                                    <?php endif; ?>
+                                                </td>
                                                 <td><?= $mold['ITEM']; ?></td>
                                                 <td><?= $mold['suplier']; ?></td>
                                                 <td><?= $mold['MADE_IN'] ?></td>

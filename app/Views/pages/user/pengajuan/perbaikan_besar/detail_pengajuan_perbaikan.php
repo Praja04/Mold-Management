@@ -52,7 +52,9 @@
                                                     <td><?= $i++; ?></td>
                                                     <td><?= $user['tanggal_pengajuan']; ?></td>
                                                     <td><?= $user['kondisi_mold']; ?></td>
-                                                    <td><?= $user['gambar_rusak'] ?></td>
+                                                    <td>
+                                                        <img src="<?= base_url('uploads/' . $user['gambar_rusak']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_rusak']) ?>">
+                                                    </td>
                                                     <td>
                                                         <?php if ($user['terima_perbaikan'] != 'no') : ?>
                                                             <button class="btn btn-success">Approved</button>
@@ -60,7 +62,7 @@
                                                             <button class="btn btn-danger">Pending</button>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td><?=$user['keterangan']?></td>
+                                                    <td><?= $user['keterangan'] ?></td>
                                                     <td><?php if ($user['rencana_perbaikan'] != null) : ?>
                                                             <?= $user['rencana_perbaikan'] ?>
                                                         <?php else : ?>
@@ -76,16 +78,19 @@
                                                     </td>
                                                     <td>
                                                         <?php if ($user['gambar_diperbaiki'] != null) : ?>
-                                                            <?= $user['gambar_diperbaiki'] ?>
+                                                            <img src="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>">
                                                         <?php else : ?>
-                                                            <p style="color: red;">Belum input</p>
+                                                            <p style="color: red;">Belum Upload</p>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
                                                         <?php if ($user['dokumen_pendukung'] != null) : ?>
-                                                            <?= $user['dokumen_pendukung'] ?>
+                                                            <button type="button" class="btn btn-link btn-image-modal2" data-pdf="<?= base_url('uploads/' . $user['dokumen_pendukung']); ?>">
+
+                                                                <i class="fa fa-file-pdf-o"></i> Lihat dokumen
+                                                            </button>
                                                         <?php else : ?>
-                                                            <p style="color: red;">Belum input</p>
+                                                            <p style="color: red;">Belum Upload</p>
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
@@ -128,7 +133,33 @@
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel">Gambar Kerusakan</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="modalImage" src="" class="img-fluid" alt="Gambar Kerusakan">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="modal fade" id="pdfModal2" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pdfModalLabel">Dokumen Viewer</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <embed id="pdfViewer2" src="" type="application/pdf" width="100%" height="600px">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </section>
         <!-- /.content -->
@@ -145,7 +176,17 @@
             "info": true, // Show table information
             "lengthChange": true // Allow the user to change the number of rows displayed
         });
-
+        $('#imageModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var imageUrl = button.data('image');
+            var modal = $(this);
+            modal.find('#modalImage').attr('src', imageUrl);
+        });
+        $('.btn-image-modal2').on('click', function() {
+            var pdfUrl = $(this).data('pdf');
+            $('#pdfViewer2').attr('src', pdfUrl);
+            $('#pdfModal2').modal('show');
+        });
     });
 </script>
 

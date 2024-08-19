@@ -39,7 +39,7 @@
                                                             <?= $user['Hasil_Verifikasi_Count_No']; ?>
                                                         </a>
                                                     </td>
-                                                    <td><a href="<?= base_url('perbaikan/besar/yes') ?>?namaMold=<?= urlencode($user['ITEM']) ?>" class="btn btn-success text-white me-0">
+                                                    <td><a href="<?= base_url('perbaikan/besar/yes') ?>?namaMold=<?= urlencode($user['ITEM']) ?>" class="btn btn-<?= $user['Hasil_Verifikasi_Count_Yes'] > 0 ? 'danger' : 'success' ?> text-white me-0">
                                                             <?= $user['Hasil_Verifikasi_Count_Yes']; ?>
                                                         </a></td>
                                                     <td>

@@ -62,12 +62,19 @@
                                     </div>
                                     <hr />
                                     <div class="gap-items">
-                                        <button id="update-data-btn" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modal-update-gambar">
+                                        <button id="update-gambar-btn" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modal-update-gambar">
                                             <i class="mdi mdi-file-image"></i> Update Gambar
                                         </button>
                                         <button id="update-data-btn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-update-data">
                                             <i class="mdi mdi-equal-box"></i> Update Data Mold
                                         </button>
+                                        <button id="update-status-btn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-update-status">
+                                            <i class="mdi mdi-loop"></i> Update Status
+                                        </button>
+                                        <button id="delete-btn" type="button" class="btn btn-danger btn-delete" data-id="<?= $moldData[0]['NO'] ?>">
+                                            <i class="mdi mdi-delete"></i> Delete Mold
+                                        </button>
+
                                     </div>
                                     <hr>
                                     <h4 class="box-title mt-20">Spesifikasi</h4>
@@ -304,6 +311,70 @@
             </div>
         </div>
 
+        <div class="modal center-modal fade" id="modal-update-status" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="height: max-content;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Status Mold</h5>
+
+                    </div>
+                    <div class="modal-body">
+                        <form id="update-status">
+                            <input type="hidden" id="id" name="id_mold" value="<?= $mold['NO']; ?>">
+                            <div class="form-group">
+                                <label class="form-label">Status Mold</label>
+                                <select class="form-select" name="status" id="status">
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="INACTIVE">In Active</option>
+                                    <option value="NEW / INACTIVE">NEW / In Active</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer modal-footer-uniform">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="save-button-status" class="btn btn-primary float-end">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal center-modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Apakah yakin menghapus data mold ini <strong>(<?= $moldData[0]['ITEM'] ?>)</strong> ?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="alertModalLabel">Notif</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="modalMessage">
+                        <!-- Message will be inserted here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button id="modalok" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- /.content -->
     </div>
@@ -323,6 +394,10 @@
             var modal = $(this);
         });
         $('#modal-update-data').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+        });
+        $('#modal-update-status').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget);
             var modal = $(this);
         });
@@ -391,6 +466,79 @@
                 }
             });
         });
+
+        $('#save-button-status').on('click', function() {
+            var formData = new FormData();
+            formData.append('id', $('#id').val());
+            formData.append('status', $('#status').val())
+            $.ajax({
+                url: baseUrl + 'update/status/mold',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.hasOwnProperty('message')) {
+
+                        $('#modal-update-status').modal('hide');
+                        showToast(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    } else if (response.hasOwnProperty('error')) {
+                        showToast(response.error, true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+        $('.btn-delete').on('click', function() {
+            deleteId = $(this).data('id');
+            $('#deleteModal').modal('show'); // Show the confirmation modal
+        });
+
+        $('#confirmDeleteBtn').on('click', function() {
+            $.ajax({
+                url: '<?= base_url('delete/mold/'); ?>' + deleteId, // Replace 'controllerName' with your actual controller name
+                type: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        $('#deleteModal').modal('hide'); // Hide the modal
+                        showModal('Data deleted successfully.');
+
+                    } else {
+                        showModal('Failed to delete data.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showModal('An error occurred: ' + xhr.status + ' ' + xhr.statusText);
+                }
+            });
+        });
+
+
+        function showModal(message, callback) {
+            if (message === 'Data submitted successfully!') {
+                $('#modalMessage').text('Data Sudah Diverifikasi');
+            } else {
+                $('#modalMessage').text(message);
+            }
+            $('#alertModal').modal('show');
+
+            if (callback) {
+                $('#alertModal').on('hidden.bs.modal', function() {
+                    callback();
+                    $(this).off('hidden.bs.modal'); // Menghapus callback setelah dipanggil agar tidak memicu berkali-kali
+                });
+            }
+
+            $('#modalok').on('click', function() {
+                window.location.href = '<?= base_url('products/mold') ?>'; // Redirect to the specified URL
+            });
+        }
 
         function showToast(message, isError = false) {
             var submitToast = $('#submitToast');

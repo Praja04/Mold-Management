@@ -162,6 +162,7 @@
 
         function renderCharts() {
             // Render Akumulasi Shot per Mold chart
+            accumulatedShotsData.sort((a, b) => b.total - a.total);
             const categoriesShot = accumulatedShotsData.map(item => item.nama_mold);
             const akumulasiShotData = accumulatedShotsData.map(item => item.total);
 
@@ -215,6 +216,7 @@
             });
 
             // Render Total Jumlah Report Problem Harian per Mold chart
+            reportData.sort((a, b) => b.total_reports - a.total_reports);
             const categoriesReport = reportData.map(item => item.mold_name);
             const totalReportsData = reportData.map(item => item.total_reports);
 
@@ -253,6 +255,7 @@
             });
 
             // Render Total Jumlah Perbaikan Besar per Mold chart
+            perbaikanData.sort((a, b) => b.total_perbaikan - a.total_perbaikan);
             const categoriesPerbaikan = perbaikanData.map(item => item.mold_name);
             const totalPerbaikanData = perbaikanData.map(item => item.total_perbaikan);
 
@@ -291,6 +294,7 @@
             });
 
             // Render Akumulasi Rejection Mold chart
+
             const categoriesQuantity = [
                 'Setup Mesin', 'Cuci Barel', 'Cuci Mold', 'Unfil', 'Bubble',
                 'Crack', 'Blackdot', 'Undercut', 'Belang', 'Scratch',
@@ -369,9 +373,9 @@
             });
 
             // Render Total Jumlah Rejection per Supplier chart
+            rejectionData.sort((a, b) => b.total_jumlah_ng - a.total_jumlah_ng);
             const suppliers = rejectionData.map(item => item.suplier);
             const totalJumlahNgData = rejectionData.map(item => item.total_jumlah_ng);
-
             Highcharts.chart('container5', {
                 chart: {
                     type: 'column'

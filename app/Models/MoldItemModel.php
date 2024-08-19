@@ -61,9 +61,10 @@ class MoldItemModel extends Model
 
     public function getAllItems()
     {
-        return $this->select('mold_item.*, suplier.suplier')
-        ->join('suplier', 'mold_item.ITEM = suplier.mold_name', 'left')
-        ->findAll();
+        return $this->select('mold_item.*, suplier.suplier, detail_mold.Gambar_Mold')
+            ->join('suplier', 'mold_item.ITEM = suplier.mold_name', 'left')
+            ->join('detail_mold', 'mold_item.ITEM = detail_mold.Part_Name', 'left')
+            ->findAll();
     }
 
     public function TotalAllItems()
@@ -177,8 +178,8 @@ class MoldItemModel extends Model
 
         // Ambil data mold_name dari suplier berdasarkan supplier dan tahun terbaru
         $query = $this->db->table('suplier')
-        ->select('mold_name, jumlah_produk')
-        ->where('suplier', $supplier)
+            ->select('mold_name, jumlah_produk')
+            ->where('suplier', $supplier)
             ->where('tahun', $latestYear['tahun'])
             ->get();
 
@@ -215,8 +216,8 @@ class MoldItemModel extends Model
 
         // Ambil data mold_name dari suplier berdasarkan supplier dan tahun terbaru
         $query = $this->db->table('suplier')
-        ->select('mold_name')
-        ->where('suplier', $supplier)
+            ->select('mold_name')
+            ->where('suplier', $supplier)
             ->where('tahun', $latestYear['tahun'])
             ->get();
 
@@ -258,7 +259,7 @@ class MoldItemModel extends Model
         // Fetch user IDs based on suplier values
         foreach ($suplierData as $suplier) {
             $users = $userModel->select('id')
-            ->where('suplier', $suplier['suplier'])
+                ->where('suplier', $suplier['suplier'])
                 ->findAll();
             // Add user IDs to the userData array
             foreach ($users as $user) {
@@ -272,6 +273,4 @@ class MoldItemModel extends Model
             'userData' => $userData
         ];
     }
-
-    
 }

@@ -63,7 +63,7 @@ class PerbaikanBesarModel extends Model
             ->join('mold_item', 'perbaikan_besar.nama_mold = mold_item.ITEM', 'left')
             ->where('mold_item.ITEM', $item)
             ->where('perbaikan_besar.terima_perbaikan', 'yes')
-            ->where('perbaikan_besar.visit', 0)
+            ->where('perbaikan_besar.temporary IS NULL')
             ->countAllResults();
 
         return [
@@ -110,7 +110,7 @@ class PerbaikanBesarModel extends Model
             ->select('u.id AS user_id, 
               COUNT(CASE WHEN pd.terima_perbaikan = \'no\' THEN 1 END) AS total_data_no, 
               COUNT(CASE WHEN pd.terima_perbaikan = \'yes\' THEN 1 END) AS total_data_yes')
-            ->join('perbaikan_besar pd', 'u.id = pd.user_id AND pd.visit = 0', 'left')
+            ->join('perbaikan_besar pd', 'u.id = pd.user_id AND pd.temporary is NULL', 'left')
             ->groupBy('u.id')
             ->orderBy('total_data_no', 'DESC');
 

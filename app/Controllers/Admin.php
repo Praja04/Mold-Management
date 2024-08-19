@@ -15,11 +15,9 @@ class Admin extends BaseController
 
     public function updateProdukById()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
-
         $model = new SupplierModel();
         $id = $this->request->getPost('id_mold');
         $jumlah = $this->request->getPost('jumlah');
@@ -44,9 +42,8 @@ class Admin extends BaseController
 
     public function dashboard()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
 
         $namaAdmin = session()->get('admin_nama');
@@ -73,9 +70,8 @@ class Admin extends BaseController
     public function report_perbaikan_besar()
     {
 
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $user = new UserModel();
         $perbaikan = new PerbaikanBesarModel();
@@ -112,9 +108,8 @@ class Admin extends BaseController
 
     public function perbaikanBesar_detail_no()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $perbaikan = new PerbaikanBesarModel();
         $nama_mold = $this->request->getGet('namaMold');
@@ -130,9 +125,8 @@ class Admin extends BaseController
     }
     public function perbaikanBesar_detail_yes()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $perbaikan = new PerbaikanBesarModel();
         $nama_mold = $this->request->getGet('namaMold');
@@ -148,9 +142,8 @@ class Admin extends BaseController
     }
     public function perbaikanBesar_detail()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $perbaikan = new PerbaikanBesarModel();
         $nama_mold = $this->request->getGet('namaMold');
@@ -164,9 +157,8 @@ class Admin extends BaseController
 
     public function report_perbaikan_daily()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $user = new UserModel();
         $report = new TransaksiJumlahProduk();
@@ -189,9 +181,8 @@ class Admin extends BaseController
 
     public function notif_perbaikan()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $PerbaikanModel = new PerbaikanBesarModel();
         $reportModel = new ReportModel();
@@ -203,9 +194,8 @@ class Admin extends BaseController
 
     public function logBook_perbaikan()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         try {
             $perbaikan = new PerbaikanBesarModel();
@@ -218,9 +208,8 @@ class Admin extends BaseController
     }
     public function logBook_mold()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $moldItemModel = new MoldItemModel();
         $reportModel = new ReportModel();
@@ -241,9 +230,8 @@ class Admin extends BaseController
 
     public function Form_Verifikasi()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $moldItemModel = new MoldItemModel();
 
@@ -260,9 +248,8 @@ class Admin extends BaseController
     //menampilkan list user suplier cbi di dashboard
     public function userlist()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $userId = 3;
         $user = new UserModel();
@@ -275,9 +262,8 @@ class Admin extends BaseController
     //ketika salah satu list user diklik
     public function manage()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         $supplierId = $this->request->getGet('supplier');
 
@@ -292,9 +278,8 @@ class Admin extends BaseController
 
     public function manageMold()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         // Membuat instance model FormModel
         $moldDetail = new DetailMold();
@@ -339,9 +324,8 @@ class Admin extends BaseController
     //submit form verifikasi
     public function submit_verifikasi()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
 
         try {
@@ -392,11 +376,10 @@ class Admin extends BaseController
             return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
     }
-   public function update_data_mold()
+    public function update_data_mold()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
 
         try {
@@ -432,6 +415,39 @@ class Admin extends BaseController
             return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
     }
+    public function update_status_mold()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+
+        try {
+            $moldModel = new MoldItemModel();
+            $id = $this->request->getPost('id');
+
+            // Cek apakah ID valid
+            $existingMold = $moldModel->find($id);
+            if (!$existingMold) {
+                return $this->response->setJSON(['error' => 'ID tidak ditemukan']);
+            }
+
+            $datamold = [
+                'STATUS' => $this->request->getPost('status')
+            ];
+
+            // Debugging: Log data yang akan diupdate
+            log_message('info', 'Updating mold with ID: ' . $id);
+            log_message('info', 'Data to update: ' . print_r($datamold, true));
+
+            // Lakukan update
+            $moldModel->update($id, $datamold);
+
+            return $this->response->setJSON(['message' => 'Data submitted successfully!']);
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
 
     public function getItemsBySupplier()
     {
@@ -448,9 +464,8 @@ class Admin extends BaseController
 
     public function register_suplier()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
         }
         return view('pages/admin/registration/register_suplier',);
     }
@@ -545,6 +560,129 @@ class Admin extends BaseController
         $data['perbaikan'] = $perbaikan->countPerbaikanBesarByMold($nama_mold);
         return view('pages/admin/list_mold/detail_mold', $data);
     }
+
+    public function delete($id)
+    {
+        $model = new PerbaikanBesarModel(); // Replace with your actual model name
+
+        // Retrieve the record to be deleted
+        $record = $model->find($id);
+
+        if ($record) {
+            // Delete the associated image and PDF files
+            $filesToDelete = ['gambar_rusak', 'gambar_diperbaiki', 'dokumen_pendukung'];
+            foreach ($filesToDelete as $fileField) {
+                if (!empty($record[$fileField])) {
+                    $filePath = ROOTPATH . 'public/uploads/' . $record[$fileField];
+                    if (file_exists($filePath)) {
+                        unlink($filePath); // Delete the file
+                    }
+                }
+            }
+
+            // Delete the record from the database
+            if ($model->delete($id)) {
+                // If deletion is successful, return success response
+                return $this->response->setJSON(['success' => true, 'message' => 'Record and associated files deleted successfully!']);
+            } else {
+                // If deletion failed, return error response
+                return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete the record from the database.']);
+            }
+        } else {
+            // If the record is not found, return error response
+            return $this->response->setJSON(['success' => false, 'message' => 'Record not found.']);
+        }
+    }
+    public function delete_mold($id)
+    {
+        // Initialize models
+        $mold = new MoldItemModel();
+        $supplier = new SupplierModel();
+        $detail = new DetailMold();
+
+        // Retrieve the record from DetailMold using Mold_Id
+        $record = $detail->where('Mold_Id', $id)->first();
+
+        if ($record) {
+            // Delete the associated image files
+            $filesToDelete = ['Gambar_Mold'];
+
+            foreach ($filesToDelete as $fileField) {
+                if (!empty($record[$fileField])) {
+                    $filePath = ROOTPATH . 'public/uploads/' . $record[$fileField];
+                    if (file_exists($filePath)) {
+                        unlink($filePath); // Delete the file
+                    }
+                }
+            }
+
+            // Delete related records from SupplierModel based on id_mold
+            $supplier->where('id_mold', $id)->delete();
+
+            // Delete the record from DetailMold using Mold_Id
+            $detail->where('Mold_Id', $id)->delete();
+
+            // Delete the record from MoldItemModel using NO
+            $mold->where('NO', $id)->delete();
+
+            // If deletion is successful, return success response
+            return $this->response->setJSON(['success' => true, 'message' => 'Record and associated files deleted successfully!']);
+        } else {
+            // If the record is not found, return error response
+            return $this->response->setJSON(['success' => false, 'message' => 'Record not found.']);
+        }
+    }
+
+
+    public function updatePerbaikan()
+    {
+        $id_perbaikan = $this->request->getPost('id_perbaikan');
+        $status_perbaikan = $this->request->getPost('status_perbaikan');
+
+        // Ambil data lama dari database
+        $model = new PerbaikanBesarModel();
+        $existingData = $model->find($id_perbaikan);
+
+
+        // Handle file uploads
+        $gambar_diperbaiki = $this->request->getFile('gambar_diperbaiki');
+        $dokumen_pendukung = $this->request->getFile('dokumen_pendukung');
+
+        // Hapus gambar diperbaiki lama jika ada file baru yang diupload
+        if ($gambar_diperbaiki && $gambar_diperbaiki->isValid()) {
+            if (!empty($existingData['gambar_diperbaiki']) && file_exists(ROOTPATH . 'public/uploads/' . $existingData['gambar_diperbaiki'])) {
+                unlink(ROOTPATH . 'public/uploads/' . $existingData['gambar_diperbaiki']); // Hapus file lama
+            }
+            $gambar_diperbaikiname = $gambar_diperbaiki->getRandomName();
+            $gambar_diperbaiki->move(ROOTPATH . 'public/uploads', $gambar_diperbaikiname);
+        }
+
+        // Hapus dokumen pendukung lama jika ada file baru yang diupload
+        if ($dokumen_pendukung && $dokumen_pendukung->isValid()) {
+            if (!empty($existingData['dokumen_pendukung']) && file_exists(ROOTPATH . 'public/uploads/' . $existingData['dokumen_pendukung'])) {
+                unlink(ROOTPATH . 'public/uploads/' . $existingData['dokumen_pendukung']); // Hapus file lama
+            }
+            $dokumen_pendukungname = $dokumen_pendukung->getRandomName();
+            $dokumen_pendukung->move(ROOTPATH . 'public/uploads', $dokumen_pendukungname);
+        }
+        $data = [
+            'temporary' => ($status_perbaikan == 'temporary') ? 'yes' : 'no',
+            'permanen' => ($status_perbaikan == 'permanen') ? 'yes' : 'no',
+            'gambar_diperbaiki' => $gambar_diperbaikiname,
+            'dokumen_pendukung' => $dokumen_pendukungname
+        ];
+
+        // Update the database
+        $updated = $model->update($id_perbaikan, $data);
+
+        if ($updated) {
+            return $this->response->setJSON(['success' => true]);
+        } else {
+            return $this->response->setJSON(['success' => false]);
+        }
+    }
+
+
 
     //private function
     private function setAndRedirect($status, $message)
