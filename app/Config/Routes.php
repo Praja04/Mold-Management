@@ -34,6 +34,8 @@ $routes->post('upload_perbaikan_user', 'PerbaikanBesar::upload_perbaikan_user');
 $routes->get('user/data', 'User::getUserData');
 $routes->get('user/total', 'User::getUserDataTotal');
 $routes->get('notif/perbaikan', 'User::notif_perbaikan');
+$routes->post('update/report/(:num)', 'ReportDaily::update_report/$1');
+$routes->delete('delete/report/(:num)', 'ReportDaily::delete_report/$1');
 
 //admin
 $routes->get('admin/notif/perbaikan', 'Admin::notif_perbaikan');
@@ -83,3 +85,4 @@ $routes->delete('delete/perbaikan/(:num)','Admin::delete/$1');
 $routes->delete('delete/mold/(:num)','Admin::delete_mold/$1');
 $routes->post('update/perbaikan', 'Admin::updatePerbaikan');
 $routes->post('update/status/mold', 'Admin::update_status_mold');
+$routes->post('update/data/ITEM', 'Admin::update_data_ITEM');

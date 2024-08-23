@@ -318,4 +318,130 @@ class ReportDaily extends BaseController
         $data['reject']= $this->reportPerbaikan->getUserCategoryTotals();
         return $this->response->setJSON($data);
     }
+
+    public function update_report($id)
+    {
+        if (session()->get('user_nama') == '') {
+            session()->setFlashdata('gagal', 'Anda belum login');
+            return redirect()->to(base_url('/'));
+        }
+
+        $userID = session()->get('user_id');
+
+        try {
+            // Ambil data lama dari report_perbaikan
+            $oldReport = $this->reportPerbaikan->find($id);
+
+            if (!$oldReport) {
+                return $this->response->setJSON(['error' => 'Data tidak ditemukan!']);
+            }
+
+            // Ambil data dari request
+            $setup_mesin = $this->request->getPost('setup_mesin') ?? 0;
+            $cuci_barel = $this->request->getPost('cuci_barel') ?? 0;
+            $cuci_mold = $this->request->getPost('cuci_mold') ?? 0;
+            $unfil = $this->request->getPost('unfil') ?? 0;
+            $bubble = $this->request->getPost('bubble') ?? 0;
+            $crack = $this->request->getPost('crack') ?? 0;
+            $blackdot = $this->request->getPost('blackdot') ?? 0;
+            $undercut = $this->request->getPost('undercut') ?? 0;
+            $belang = $this->request->getPost('belang') ?? 0;
+            $scratch = $this->request->getPost('scratch') ?? 0;
+            $ejector_mark = $this->request->getPost('ejector_mark') ?? 0;
+            $flashing = $this->request->getPost('flashing') ?? 0;
+            $bending = $this->request->getPost('bending') ?? 0;
+            $weldline = $this->request->getPost('weldline') ?? 0;
+            $sinkmark = $this->request->getPost('sinkmark') ?? 0;
+            $silver = $this->request->getPost('silver') ?? 0;
+            $flow_material = $this->request->getPost('flow_material') ?? 0;
+            $bushing = $this->request->getPost('bushing') ?? 0;
+
+            // Hitung jumlah_ng
+            $jumlah_ng = $setup_mesin + $cuci_barel + $cuci_mold + $unfil + $bubble + $crack +
+                $blackdot + $undercut + $belang + $scratch + $ejector_mark + $flashing +
+                $bending + $weldline + $sinkmark + $silver + $flow_material + $bushing;
+
+            $nama_mold = $this->request->getPost('nama_mold');
+            $jumlah_ok = $this->request->getPost('jumlah_ok');
+
+            // Update data di report_perbaikan
+            $data = [
+                'user_id' => $userID,
+                'id_mold' => $this->request->getPost('moldId'),
+                'nama_mold' => $nama_mold,
+                'jumlah_ok' => $jumlah_ok,
+                'material' => $this->request->getPost('material'),
+                'tanggal_pengajuan' => $this->request->getPost('tanggal_report'),
+                'problem_harian' => $this->request->getPost('problem_harian'),
+                'setup_mesin' => $setup_mesin,
+                'cuci_barel' => $cuci_barel,
+                'cuci_mold' => $cuci_mold,
+                'unfil' => $unfil,
+                'bubble' => $bubble,
+                'crack' => $crack,
+                'blackdot' => $blackdot,
+                'undercut' => $undercut,
+                'belang' => $belang,
+                'scratch' => $scratch,
+                'ejector_mark' => $ejector_mark,
+                'flashing' => $flashing,
+                'bending' => $bending,
+                'weldline' => $weldline,
+                'sinkmark' => $sinkmark,
+                'silver' => $silver,
+                'flow_material' => $flow_material,
+                'bushing' => $bushing,
+                'jumlah_ng' => $jumlah_ng
+            ];
+
+            // Kurangi jumlah_ok lama dari mold_total_produk
+            $mold = $this->moldTotalProduk->where('mold_name', $nama_mold)->first();
+
+            if ($mold) {
+                $newTotal = $mold['jumlah_produk'] - $oldReport['jumlah_ok'] + $jumlah_ok;
+                $this->moldTotalProduk->update($mold['id'], ['jumlah_produk' => $newTotal]);
+            }
+
+            // Update report_perbaikan
+            $this->reportPerbaikan->update($id, $data);
+
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['error' => 'Data yang anda masukan tidak valid!']);
+        }
+    }
+    public function delete_report($id)
+    {
+        if (session()->get('user_nama') == '') {
+            session()->setFlashdata('gagal', 'Anda belum login');
+            return redirect()->to(base_url('/'));
+        }
+
+        $userID = session()->get('user_id');
+
+        try {
+            // Ambil data lama dari report_perbaikan
+            $oldReport = $this->reportPerbaikan->find($id);
+
+            if (!$oldReport) {
+                return $this->response->setJSON(['error' => 'Data tidak ditemukan!']);
+            }
+
+            $nama_mold = $oldReport['nama_mold'];
+            // Kurangi jumlah_ok lama dari mold_total_produk
+            $mold = $this->moldTotalProduk->where('mold_name', $nama_mold)->first();
+
+            if ($mold) {
+                $newTotal = $mold['jumlah_produk'] - $oldReport['jumlah_ok'] ;
+                $this->moldTotalProduk->update($mold['id'], ['jumlah_produk' => $newTotal]);
+            }
+
+            // Update report_perbaikan
+            $this->reportPerbaikan->delete($id);
+
+            return $this->response->setJSON(['success' => true, 'message' => 'Data deleted successfully!']);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete!']);
+        }
+    }
 }

@@ -135,13 +135,13 @@
 
             if (filterValue === 'all') {
                 // Show all rows
-                table.column(1).search('').draw();
+                table.column(2).search('').draw();
             } else if (filterValue === 'other') {
                 // Filter out rows that contain 'Container' or 'Cover'
-                table.column(1).search('^(?!.*(Container|Cover)).*$', true, false).draw();
+                table.column(2).search('^(?!.*(Container|Cover)).*$', true, false).draw();
             } else {
                 // Filter rows that contain the specific word (Container or Cover)
-                table.column(1).search(filterValue, true, false).draw();
+                table.column(2).search(filterValue, true, false).draw();
             }
         });
         // Filter2 button click event
@@ -150,10 +150,10 @@
 
             if (filterValue === 'all') {
                 // Show all rows
-                table.column(2).search('').draw(); // Column 2 for Supplier
+                table.column(3).search('').draw(); // Column 2 for Supplier
             } else {
                 // Filter rows by selected supplier
-                table.column(2).search('^' + filterValue + '$', true, false).draw(); // Column 2 for Supplier
+                table.column(3).search('^' + filterValue + '$', true, false).draw(); // Column 2 for Supplier
             }
         });
 

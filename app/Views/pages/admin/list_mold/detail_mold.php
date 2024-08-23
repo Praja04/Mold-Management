@@ -47,7 +47,10 @@
                                     <div class="clear"></div>
                                 </div>
                                 <div class="col-md-8 col-sm-6">
-                                    <h2 class="box-title mt-0"><?= $moldData[0]['ITEM'] ?></h2>
+                                    <div class="col-md-8">
+                                        <h2 class="box-title mt-0"><?= $moldData[0]['ITEM'] ?></h2>
+                                        <span id="update-ITEM" class="btn" data-bs-toggle="modal" data-bs-target="#modal-update-ITEM"> <i class="mdi mdi-lead-pencil mdi-24px"></i></span>
+                                    </div>
                                     <div class="list-inline">
                                         <span class="badge badge-info"><?= $moldData[0]['STATUS'] ?></span>
                                     </div>
@@ -170,6 +173,30 @@
                 </div>
             </div>
         </section>
+        <div class="modal center-modal fade" id="modal-update-ITEM" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="height: max-content;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Nama Mold</h5>
+
+                    </div>
+                    <div class="modal-body">
+                        <form id="update-ITEM">
+                            <input type="hidden" id="id" name="id_mold" value="<?= $mold['NO']; ?>">
+
+                            <div class="form-group">
+                                <label class="form-label">Nama Mold :</label>
+                                <input class="form-control" type="text" id="ITEM" name="ITEM" value="<?= $mold['ITEM']; ?>" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer modal-footer-uniform">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="save-button-ITEM" class="btn btn-primary float-end">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -397,6 +424,10 @@
             var button = $(event.relatedTarget);
             var modal = $(this);
         });
+        $('#modal-update-ITEM').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+        });
         $('#modal-update-status').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget);
             var modal = $(this);
@@ -423,6 +454,33 @@
                         showToast(response.message);
                         setTimeout(function() {
                             location.reload();
+                        }, 2000);
+                    } else if (response.hasOwnProperty('error')) {
+                        showToast(response.error, true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+        $('#save-button-ITEM').on('click', function() {
+            var formData = new FormData();
+            formData.append('id', $('#id').val());
+            formData.append('ITEM', $('#ITEM').val());
+           
+            $.ajax({
+                url: baseUrl + 'update/data/ITEM',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.hasOwnProperty('message')) {
+                        showToast(response.message);
+                        setTimeout(function() {
+                            window.location.href = '<?= base_url('products/mold')?>';
                         }, 2000);
                     } else if (response.hasOwnProperty('error')) {
                         showToast(response.error, true);

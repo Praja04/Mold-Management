@@ -696,4 +696,44 @@ class Admin extends BaseController
         session()->setFlashdata('gagal', 'Anda belum login');
         return redirect()->to(base_url('/'));
     }
+
+    public function update_data_ITEM()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+
+        try {
+            $moldModel = new MoldItemModel();
+            $suplierModel = new SupplierModel();
+            $id = $this->request->getPost('id');
+
+            // Cek apakah ID valid
+            $existingMold = $moldModel->find($id);
+            if (!$existingMold) {
+                return $this->response->setJSON(['error' => 'ID tidak ditemukan']);
+            }
+
+            $datamold = [
+                'ITEM' => $this->request->getPost('ITEM'),
+
+            ];
+            $datasuplier = [
+                'mold_name' => $this->request->getPost('ITEM'),
+            ];
+
+            // Debugging: Log data yang akan diupdate
+            log_message('info', 'Updating mold with ID: ' . $id);
+            log_message('info', 'Data to update: ' . print_r($datamold, true));
+
+            // Lakukan update
+            $moldModel->update($id, $datamold);
+            $suplierModel->where('id_mold', $id)->set($datasuplier)->update();
+
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
 }

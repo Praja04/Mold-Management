@@ -19,6 +19,8 @@
 
 	<!-- Vendors Style-->
 	<link rel="stylesheet" href="<?= base_url() ?>assets/template/main/css/vendors_css.css">
+	<link rel="stylesheet" href="<?= base_url() ?>assets/js/slick.css">
+	<link rel="stylesheet" href="<?= base_url() ?>assets/js/slick-theme.css">
 
 	<!-- Style-->
 	<link rel="stylesheet" href="<?= base_url() ?>assets/template/main/css/style.css">
@@ -168,6 +170,7 @@
 	<!-- <script src="<?= base_url() ?>assets/template/main/js/jquery-3.7.0.js"></script> -->
 	<script src="<?= base_url() ?>assets/template/main/js/jquery.dataTables.min.js"></script>
 	<script src="<?= base_url() ?>assets/template/main/js/dataTables.editor.min.js"></script>
+	<script src="<?= base_url() ?>assets/js/slick.min.js"></script>
 
 	<!-- <script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script> -->
 	<?= $this->renderSection('script') ?>
