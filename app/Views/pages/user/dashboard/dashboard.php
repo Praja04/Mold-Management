@@ -159,7 +159,6 @@
       type: 'GET',
       success: function(data) {
         const user = data.data_user;
-        console.log(user);
         $('#suplier').text(user.suplier);
         $('#nama').text('Welcome ' + user.username + ' !');
 

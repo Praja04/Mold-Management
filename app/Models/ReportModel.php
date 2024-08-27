@@ -37,24 +37,44 @@ class ReportModel extends Model
         'silver',
         'flow_material',
         'bushing',
-        'problem_harian'
+        'problem_harian',
+        'created_at'
     ];
     public function getUserCategoryTotals()
     {
+        // Get the current month and year
+        $currentMonth = date('m');
+        $currentYear = date('Y');
+
         $builder = $this->db->table('report_daily');
         $builder->select('users.suplier, 
-                      SUM(report_daily.jumlah_ng) as total_jumlah_ng');
+                          MONTH(report_daily.tanggal_pengajuan) as bulan, 
+                          YEAR(report_daily.tanggal_pengajuan) as tahun, 
+                          SUM(report_daily.jumlah_ng) as total_jumlah_ng');
         $builder->join('users', 'users.id = report_daily.user_id');
-        $builder->groupBy('users.suplier');
+        // $builder->where('MONTH(report_daily.tanggal_pengajuan)', $currentMonth);
+        // $builder->where('YEAR(report_daily.tanggal_pengajuan)', $currentYear);
+        // Use full expressions in GROUP BY for SQL Server
+        $builder->groupBy('users.suplier, 
+                           MONTH(report_daily.tanggal_pengajuan), 
+                           YEAR(report_daily.tanggal_pengajuan)');
 
         return $builder->get()->getResultArray();
     }
     public function getTotalByMold()
     {
-        return $this->select('nama_mold, SUM(jumlah_ok) as total_ok, SUM(jumlah_ng) as total_ng, (SUM(jumlah_ok) + SUM(jumlah_ng)) as total')
-        ->groupBy('nama_mold')
+        return $this->select('
+            nama_mold, 
+            YEAR(tanggal_pengajuan) as year, 
+            MONTH(tanggal_pengajuan) as month,
+            SUM(jumlah_ok) as total_ok, 
+            SUM(jumlah_ng) as total_ng, 
+            (SUM(jumlah_ok) + SUM(jumlah_ng)) as total')
+        ->groupBy('nama_mold, YEAR(tanggal_pengajuan), MONTH(tanggal_pengajuan)')
         ->findAll();
     }
+
+
 
     public function getReportsByMoldName($moldName)
     {

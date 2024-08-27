@@ -13,7 +13,7 @@
                         <nav>
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item">
-                                    <a href="#"><i class="mdi mdi-home-outline"></i></a>
+                                    <a><i class="mdi mdi-home-outline"></i></a>
                                 </li>
                                 <li class="breadcrumb-item" aria-current="page">
                                     Product Mold
@@ -39,9 +39,11 @@
                                         <?php if (!empty($detail['Gambar_Mold'])) : ?>
                                             <!-- Image that can be clicked to open the modal -->
                                             <img style="width: 300px; height:400px; cursor: pointer;" src="<?= base_url('uploads/' . $detail['Gambar_Mold']) ?>" id="product-image" class="img-fluid" alt="Gambar Mold" data-bs-toggle="modal" data-bs-target="#imageModal" />
+
                                         <?php else : ?>
                                             <!-- Empty element if the image does not exist -->
                                             <div id="product-image" class="img-fluid"></div>
+
                                         <?php endif; ?>
                                     </div>
                                     <div class="clear"></div>
@@ -65,16 +67,16 @@
                                     </div>
                                     <hr />
                                     <div class="gap-items">
-                                        <button id="update-gambar-btn" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modal-update-gambar">
+                                        <button style="margin-top: 5px;" id="update-gambar-btn" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#modal-update-gambar">
                                             <i class="mdi mdi-file-image"></i> Update Gambar
                                         </button>
-                                        <button id="update-data-btn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-update-data">
+                                        <button style="margin-top: 5px;" id="update-data-btn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-update-data">
                                             <i class="mdi mdi-equal-box"></i> Update Data Mold
                                         </button>
-                                        <button id="update-status-btn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-update-status">
+                                        <button style="margin-top: 5px;" id="update-status-btn" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-update-status">
                                             <i class="mdi mdi-loop"></i> Update Status
                                         </button>
-                                        <button id="delete-btn" type="button" class="btn btn-danger btn-delete" data-id="<?= $moldData[0]['NO'] ?>">
+                                        <button style="margin-top: 5px;" id="delete-btn" type="button" class="btn btn-danger btn-delete" data-id="<?= $moldData[0]['NO'] ?>">
                                             <i class="mdi mdi-delete"></i> Delete Mold
                                         </button>
 
@@ -146,7 +148,14 @@
 
                                                 <tr>
                                                     <td width="390">Supplier</td>
-                                                    <td><?= $suplierData[0]['suplier']; ?></td>
+                                                    <td>
+                                                        <?= $suplierData[0]['suplier']; ?>
+
+                                                    </td>
+                                                    <td>
+                                                        <button style="margin-left: 15px;" class="btn btn-warning" id="update-suplier-btn" data-bs-toggle="modal" data-bs-target="#modal-suplier" data-id="<?= $moldData[0]['NO'] ?>"><span class="mdi mdi-account-edit mdi-20px"></span>&nbsp;Pindah</button>
+                                                    </td>
+
                                                 </tr>
                                                 <tr>
                                                     <td>Total Produksi</td>
@@ -154,11 +163,20 @@
                                                 </tr>
                                                 <tr>
                                                     <td>Total Perbaikan Harian (Kecil)</td>
-                                                    <td><?= $report ?></td>
+                                                    <td>
+                                                        <?= $report ?>
+                                                    </td>
+                                                    <td>
+                                                        <a style="margin-left: 15px;" class="btn btn-primary text-white me-0" href="<?= base_url('daily/detail') ?>?namaMold=<?= urlencode($moldData[0]['ITEM']) ?>"><span class="mdi mdi-calendar-today"></span> harian</a>
+                                                    </td>
+
                                                 </tr>
                                                 <tr>
                                                     <td>Total Perbaikan Perbaikan Besar</td>
                                                     <td><?= $perbaikan ?></td>
+                                                    <td>
+                                                        <a style="margin-left: 15px;" class="btn btn-primary text-white me-0" href="<?= base_url('perbaikan/besar/detail') ?>?namaMold=<?= urlencode($moldData[0]['ITEM']) ?>"><span class="mdi mdi-package-variant"></span> perbaikan</a>
+                                                    </td>
                                                 </tr>
 
 
@@ -173,6 +191,35 @@
                 </div>
             </div>
         </section>
+        <div class="modal center-modal fade" id="modal-suplier" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="height: max-content;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pemindahan Mold</h5>
+
+                    </div>
+                    <div class="modal-body">
+                        <form id="update-suplier">
+                            <input type="hidden" id="id_pindah" name="id_mold">
+                            <div class="form-group">
+                                <label class="form-label">Pindahkan ke Suplier</label>
+                                <select id="suplier" name="suplier" class="form-select">
+                                    <option value="">Pilih Supplier</option>
+                                    <?php foreach ($suppliers as $supplier) : ?>
+                                        <option value="<?= $supplier['suplier']; ?>"><?= $supplier['suplier']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer modal-footer-uniform">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="save-button-suplier" class="btn btn-primary float-end">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal center-modal fade" id="modal-update-ITEM" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content" style="height: max-content;">
@@ -432,6 +479,12 @@
             var button = $(event.relatedTarget);
             var modal = $(this);
         });
+        $('#modal-suplier').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var idMold = button.data('id');
+            var modal = $(this);
+            modal.find('#id_pindah').val(idMold);
+        });
 
         $('#submitBtn').on('click', function() {
             var formData = new FormData();
@@ -469,7 +522,7 @@
             var formData = new FormData();
             formData.append('id', $('#id').val());
             formData.append('ITEM', $('#ITEM').val());
-           
+
             $.ajax({
                 url: baseUrl + 'update/data/ITEM',
                 type: 'POST',
@@ -480,7 +533,7 @@
                     if (response.hasOwnProperty('message')) {
                         showToast(response.message);
                         setTimeout(function() {
-                            window.location.href = '<?= base_url('products/mold')?>';
+                            window.location.href = '<?= base_url('products/mold') ?>';
                         }, 2000);
                     } else if (response.hasOwnProperty('error')) {
                         showToast(response.error, true);
@@ -552,6 +605,35 @@
                 }
             });
         });
+
+        $('#save-button-suplier').on('click', function() {
+            var formData = new FormData();
+            formData.append('id', $('#id_pindah').val());
+            formData.append('suplier', $('#suplier').val())
+            $.ajax({
+                url: baseUrl + 'pemindahan/mold',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.hasOwnProperty('message')) {
+
+                        $('#modal-suplier').modal('hide');
+                        showToast(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    } else if (response.hasOwnProperty('error')) {
+                        showToast(response.error, true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
 
         $('.btn-delete').on('click', function() {
             deleteId = $(this).data('id');

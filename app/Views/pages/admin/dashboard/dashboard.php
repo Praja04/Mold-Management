@@ -1,6 +1,23 @@
 <?= $this->extend('template/layout'); ?>
 
 <?= $this->section('content'); ?>
+<div class="sticky-toolbar" style="width: 110px;border-radius: 10px 0 0 10px; background-color: rgba(108, 117, 125, 0.3);">
+    <!-- <a data-bs-toggle="tooltip" data-bs-placement="left" title="Buy Now" class="waves-effect waves-light btn btn-success btn-flat mb-5 btn-sm" target="_blank">
+        <span class="icon-Money"><span class="path1"></span><span class="path2"></span></span>
+    </a>
+    <a href="https://themeforest.net/user/multipurposethemes/portfolio" data-bs-toggle="tooltip" data-bs-placement="left" title="Portfolio" class="waves-effect waves-light btn btn-danger btn-flat mb-5 btn-sm" target="_blank">
+        <span class="icon-Image"></span>
+    </a>
+    <a id="chat-popup" href="#" data-bs-toggle="tooltip" data-bs-placement="left" title="Live Chat" class="waves-effect waves-light btn btn-warning btn-flat btn-sm">
+        <span class="icon-Group-chat"><span class="path1"></span><span class="path2"></span></span>
+    </a> -->
+    <span class="badge badge-primary">Filter</span>
+    <label class="form-label">Tahun :</label>
+    <select id="yearFilter" class="form-select"></select>
+    <label class="form-label">Bulan :</label>
+    <select id="monthFilter" class="form-select">
+    </select>
+</div>
 <div class="content-wrapper">
     <div class="container-full">
         <!-- Main content -->
@@ -75,18 +92,24 @@
 
     </div>
     <!-- Highcharts Section -->
-    <div class="row" style="margin-top: 60px;">
-        <div class="col-xl-1 col-md-6 col-12"></div>
-        <div class="col-xl-3 col-md-6 col-12">
-            <h5>Grafik Data Shot Mold</h5>
-        </div>
-        <div class="col-xl-3 col-md-6 col-12"></div>
-        <div class="col-xl-3 col-md-6 col-12">
 
+    <div class="row" style="margin: 20px;">
+        <div class="col-xl-12">
+            <div class="box">
+                <div class="box-header" id="box-header">
+                    <h4 class="box-title">Akumulasi Shot Mold</h4>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-lg-12 col-12">
+                            <div id="container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-12">
-            <div id="container" style="width: 100%; height: 400px; margin-top: 20px; "></div>
-        </div>
+        <div class="col-xl-1 col-md-6 col-12"></div>
+
         <div class="col-12">
             <div id="container2" style="width: 100%; height: 400px; margin-top: 20px; "></div>
         </div>
@@ -105,7 +128,7 @@
 </div>
 <script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
 <script src="<?= base_url() ?>assets/js/highcharts/highcharts.js" type="text/javascript"></script>
-<script>
+<!-- <script>
     $(document).ready(async function() {
         // Declare unique variables for storing data
         let accumulatedShotsData = [];
@@ -429,7 +452,350 @@
         // Call the async function to fetch data and render charts
         fetchData();
     });
+</script> -->
+<script>
+    $(document).ready(async function() {
+        let accumulatedShotsData = [];
+        let reportData = [];
+        let perbaikanData = [];
+        let rejectionData = [];
+        let quantityData = {};
+
+        async function fetchData() {
+            try {
+                const [shotResponse, reportResponse, perbaikanResponse, rejectionResponse, quantityResponse] = await Promise.all([
+                    $.ajax({
+                        url: '<?= base_url('akumulasi/shot') ?>',
+                        method: 'GET',
+                        dataType: 'json'
+                    }),
+                    $.ajax({
+                        url: '<?= base_url('akumulasi/report') ?>',
+                        method: 'GET',
+                        dataType: 'json'
+                    }),
+                    $.ajax({
+                        url: '<?= base_url('akumulasi/perbaikan') ?>',
+                        method: 'GET',
+                        dataType: 'json'
+                    }),
+                    $.ajax({
+                        url: '<?= base_url('akumulasi/rejection') ?>',
+                        method: 'GET',
+                        dataType: 'json'
+                    }),
+                    $.ajax({
+                        url: '<?= base_url('get/quantity') ?>',
+                        method: 'GET',
+                        dataType: 'json'
+                    })
+                ]);
+
+                accumulatedShotsData = shotResponse.accumulatedShots;
+                reportData = reportResponse.jumlah_report;
+                perbaikanData = perbaikanResponse.jumlah_perbaikan;
+                rejectionData = rejectionResponse.reject;
+                quantityData = quantityResponse.data;
+
+                // Populate the filters
+                populateYearFilter();
+                populateMonthFilter();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function populateYearFilter() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const yearFilter = $('#yearFilter');
+            yearFilter.empty();
+
+            for (let year = currentYear - 5; year <= currentYear; year++) {
+                yearFilter.append(`<option value="${year}">${year}</option>`);
+            }
+
+            yearFilter.change(function() {
+                const selectedYear = parseInt($(this).val(), 10);
+                const selectedMonth = parseInt($('#monthFilter').val(), 10);
+                filterAndRenderCharts(selectedYear, selectedMonth);
+            });
+
+            yearFilter.val(currentYear);
+        }
+
+        function populateMonthFilter() {
+            const now = new Date();
+            const months = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+            const monthFilter = $('#monthFilter');
+            monthFilter.empty();
+
+            months.forEach((month, index) => {
+                const monthNumber = index + 1;
+                monthFilter.append(`<option value="${monthNumber}">${month}</option>`);
+            });
+
+            monthFilter.change(function() {
+                const selectedMonth = parseInt($(this).val(), 10);
+                const selectedYear = parseInt($('#yearFilter').val(), 10);
+                filterAndRenderCharts(selectedYear, selectedMonth);
+            });
+
+            const currentMonth = now.getMonth() + 1;
+            monthFilter.val(currentMonth).trigger('change');
+        }
+
+        function filterAndRenderCharts(selectedYear, selectedMonth) {
+            const filteredShots = accumulatedShotsData.filter(item => item.year === selectedYear && item.month === selectedMonth);
+            const filteredReports = reportData.filter(item => item.year === selectedYear && item.month === selectedMonth);
+            const filteredPerbaikan = perbaikanData.filter(item => item.year === selectedYear && item.month === selectedMonth);
+            const filteredRejection = rejectionData.filter(item => item.tahun === selectedYear && item.bulan === selectedMonth);
+
+            console.log('Filtered Rejection:', filteredRejection);
+
+            renderCharts(filteredShots, filteredReports, filteredPerbaikan, filteredRejection);
+        }
+
+        function renderCharts(filteredShots, filteredReports, filteredPerbaikan, filteredRejection) {
+            // Akumulasi Shot per-mold chart
+            filteredShots.sort((a, b) => b.total - a.total);
+            const categoriesShot = filteredShots.map(item => item.nama_mold);
+            const akumulasiShotData = filteredShots.map(item => item.total);
+
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Akumulasi Shot per-mold'
+                },
+                xAxis: {
+                    categories: categoriesShot,
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Jumlah Akumulasi Shot'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return Highcharts.numberFormat(this.value, 0, '.', ',');
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td><td style="padding:0"><b>{point.y:,.0f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Akumulasi Shot',
+                    data: akumulasiShotData.map(value => ({
+                        y: value,
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return Highcharts.numberFormat(this.y, 0, '.', ',');
+                            }
+                        }
+                    }))
+                }]
+            });
+
+            // Total Jumlah Report Problem Harian per Mold chart
+            reportData.sort((a, b) => b.total_reports - a.total_reports);
+            const categoriesReport = reportData.map(item => item.mold_name);
+            const totalReportsData = reportData.map(item => item.total_reports);
+
+            Highcharts.chart('container2', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Total Jumlah Report Problem Harian per Mold'
+                },
+                xAxis: {
+                    categories: categoriesReport,
+                    title: {
+                        text: 'Nama Mold'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Total Report'
+                    }
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.y}</b>'
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Total Report',
+                    data: totalReportsData
+                }]
+            });
+
+            // Total Jumlah Perbaikan Besar per Mold chart
+            perbaikanData.sort((a, b) => b.total_perbaikan - a.total_perbaikan);
+            const categoriesPerbaikan = perbaikanData.map(item => item.mold_name);
+            const totalPerbaikanData = perbaikanData.map(item => item.total_perbaikan);
+
+            Highcharts.chart('container3', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Total Jumlah Perbaikan Besar per Mold'
+                },
+                xAxis: {
+                    categories: categoriesPerbaikan,
+                    title: {
+                        text: 'Nama Mold'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Total Perbaikan'
+                    }
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.y}</b>'
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Total Perbaikan',
+                    data: totalPerbaikanData
+                }]
+            });
+
+            // Akumulasi Rejection Mold chart
+            const categoriesQuantity = [
+                'Setup Mesin', 'Cuci Barel', 'Cuci Mold', 'Unfil', 'Bubble',
+                'Crack', 'Blackdot', 'Undercut', 'Belang', 'Scratch',
+                'Ejector Mark', 'Flashing', 'Bending', 'Weldline',
+                'Sinkmark', 'Silver', 'Flow Material', 'Bushing'
+            ];
+
+            const akumulasiRejectionData = [
+                quantityData.total_setup_mesin || 0,
+                quantityData.total_cuci_barel || 0,
+                quantityData.total_cuci_mold || 0,
+                quantityData.total_unfil || 0,
+                quantityData.total_bubble || 0,
+                quantityData.total_crack || 0,
+                quantityData.total_blackdot || 0,
+                quantityData.total_undercut || 0,
+                quantityData.total_belang || 0,
+                quantityData.total_scratch || 0,
+                quantityData.total_ejector_mark || 0,
+                quantityData.total_flashing || 0,
+                quantityData.total_bending || 0,
+                quantityData.total_weldline || 0,
+                quantityData.total_sinkmark || 0,
+                quantityData.total_silver || 0,
+                quantityData.total_flow_material || 0,
+                quantityData.total_bushing || 0
+            ];
+
+            Highcharts.chart('container4', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Akumulasi Rejection Mold'
+                },
+                xAxis: {
+                    categories: categoriesQuantity,
+                    title: {
+                        text: 'Jenis Rejection'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Jumlah Rejection'
+                    }
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.y}</b>'
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Jumlah Rejection',
+                    data: akumulasiRejectionData
+                }]
+            });
+
+            const suppliers = [...new Set(filteredRejection.map(item => item.suplier))]; // Changed 'supplier' to 'suplier' based on your data
+            const totalRejectionPerSupplierData = suppliers.map(supplier => {
+                return filteredRejection
+                    .filter(item => item.suplier === supplier) // Changed 'supplier' to 'suplier'
+                    .reduce((acc, item) => acc + item.total_jumlah_ng, 0); // Changed 'total_rejection' to 'total_jumlah_ng'
+            });
+
+            Highcharts.chart('container5', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Total Jumlah Rejection per Supplier'
+                },
+                xAxis: {
+                    categories: suppliers,
+                    title: {
+                        text: 'Supplier'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Jumlah Rejection'
+                    }
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.y}</b>'
+                },
+                series: [{
+                    name: 'Jumlah Rejection',
+                    data: totalRejectionPerSupplierData
+                }]
+            });
+
+        }
+
+        await fetchData();
+    });
 </script>
+
 
 
 <?= $this->endSection() ?>

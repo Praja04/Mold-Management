@@ -12,7 +12,18 @@ use App\Models\SupplierModel;
 
 class Admin extends BaseController
 {
+    //private function
+    private function setAndRedirect($status, $message)
+    {
+        session()->setFlashdata($status, $message);
+        return redirect()->to(base_url('register/new/mold'));
+    }
 
+    private function redirectLogin()
+    {
+        session()->setFlashdata('gagal', 'Anda belum login');
+        return redirect()->to(base_url('/'));
+    }
     public function updateProdukById()
     {
         if (!session()->has('admin_nama')) {
@@ -545,11 +556,13 @@ class Admin extends BaseController
         $mold = new MoldItemModel();
         $detail = new DetailMold();
         $jumlah = new SupplierModel();
+        $supplier = new UserModel();
         $report = new ReportModel();
         $perbaikan = new PerbaikanBesarModel();
         $nama_mold = $this->request->getGet('namaMold');
         $result = $mold->getDataByItem($nama_mold);
         // Memisahkan data mold dan suplier untuk efisiensi
+        $data['suppliers'] = $supplier->getUser();
         $data['detail'] = $detail->getLatestByPartName($nama_mold);
         $data['moldData'] = $result['moldData'];
         $data['suplierData'] = $result['suplierData'];
@@ -682,21 +695,6 @@ class Admin extends BaseController
         }
     }
 
-
-
-    //private function
-    private function setAndRedirect($status, $message)
-    {
-        session()->setFlashdata($status, $message);
-        return redirect()->to(base_url('register/new/mold'));
-    }
-
-    private function redirectLogin()
-    {
-        session()->setFlashdata('gagal', 'Anda belum login');
-        return redirect()->to(base_url('/'));
-    }
-
     public function update_data_ITEM()
     {
         if (!session()->has('admin_nama')) {
@@ -728,6 +726,30 @@ class Admin extends BaseController
 
             // Lakukan update
             $moldModel->update($id, $datamold);
+            $suplierModel->where('id_mold', $id)->set($datasuplier)->update();
+
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+    public function pemindahan_mold()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+
+        try {
+            $suplierModel = new SupplierModel();
+            $id = $this->request->getPost('id');
+
+            // Cek apakah ID valid
+            
+            $datasuplier = [
+                'suplier' => $this->request->getPost('suplier'),
+
+            ];
             $suplierModel->where('id_mold', $id)->set($datasuplier)->update();
 
             return $this->response->setJSON(['message' => 'Data updated successfully!']);

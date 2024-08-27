@@ -86,3 +86,4 @@ $routes->delete('delete/mold/(:num)','Admin::delete_mold/$1');
 $routes->post('update/perbaikan', 'Admin::updatePerbaikan');
 $routes->post('update/status/mold', 'Admin::update_status_mold');
 $routes->post('update/data/ITEM', 'Admin::update_data_ITEM');
+$routes->post('pemindahan/mold', 'Admin::pemindahan_mold');

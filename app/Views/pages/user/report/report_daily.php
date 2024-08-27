@@ -119,7 +119,7 @@
                                     <hr class="my-15">
                                     <div class="form-group">
                                         <label class="form-label">Keterangan Problem</label>
-                                        <input class="form-control" type="text" id="keterangan_problem" placeholder="jika terjadi problem">
+                                        <input class="form-control" type="text" id="keterangan_problem" placeholder="jika tidak ada problem,kosongkan!">
                                     </div>
                                 </div>
                                 <button type="button" class="btn btn-success" id="submitBtn">Submit</button>
@@ -135,14 +135,13 @@
 </div>
 
 
-<script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
-
-
+<script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script> /\
 <script>
     $(document).ready(function() {
         const baseUrl = '<?= base_url() ?>';
         const maxNgItems = 18;
         let ngCount = 1;
+
         $('#material').change(function() {
             if ($(this).val() === 'Other') {
                 $('#other-material-container').show();
@@ -218,12 +217,6 @@
             moldId = $('#partname').find('option:selected').data('id');
         }
 
-        // const waktuSekarang = new Date();
-        // const tahun = waktuSekarang.getFullYear();
-        // const bulan = waktuSekarang.getMonth() + 1;
-        // const tanggal = waktuSekarang.getDate();
-        // $('#tanggal_report').val(`${tanggal}/${bulan}/${tahun}`);
-
         $('#submitBtn').click(function() {
             const requiredInputs = $('#form1-content [required]');
             let allValid = true;
@@ -274,7 +267,7 @@
         });
 
         $(document).on('change', '.jenis_ng', function() {
-            const index = $(this).data('index');;
+            const index = $(this).data('index');
             let jenis_dipilih = $(this).val();
             updateSatuanText(index, jenis_dipilih);
         });
@@ -303,6 +296,20 @@
             }
         }
 
+        function isNumericOrSymbolOnly(value) {
+            // Function to check if value contains only numbers or symbols
+            const numericRegex = /^[0-9]+$/;
+            const symbolRegex = /^[!@#$%^&*()_+={}[\]:;"'<>,.?/]+$/;
+
+            if (numericRegex.test(value)) {
+                return true; // It's purely numeric
+            }
+            if (symbolRegex.test(value)) {
+                return true; // It's purely symbols
+            }
+            return false; // Contains other characters (letters, mixed)
+        }
+
         function submitForm() {
             const formData = new FormData();
             formData.append('moldId', moldId);
@@ -314,7 +321,13 @@
             }
             formData.append('material', selectedMaterial);
             formData.append('tanggal_report', $('#tanggal_report').val());
-            formData.append('problem_harian', $('#keterangan_problem').val());
+
+            // Check and set problem_harian to null if it's numeric or symbolic only
+            let problem_harian = $('#keterangan_problem').val();
+            if (isNumericOrSymbolOnly(problem_harian)) {
+                problem_harian = null;
+            }
+            formData.append('problem_harian', problem_harian);
 
             // Daftar kolom yang diperbolehkan dari model ReportModel
             const allowedFields = [
@@ -397,4 +410,5 @@
         });
     });
 </script>
+
 <?= $this->endSection() ?>

@@ -82,7 +82,7 @@
                                                 <?php endforeach; ?>
                                             <?php else : ?>
                                                 <tr>
-                                                    <td colspan="24">No data available</td>
+                                                    No data available
                                                 </tr>
                                             <?php endif; ?>
                                         </tbody>
