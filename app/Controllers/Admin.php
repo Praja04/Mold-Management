@@ -497,45 +497,79 @@ class Admin extends BaseController
         if (!session()->has('admin_nama')) {
             return $this->redirectLogin();
         }
+        try {
+            $supplierModel = new SupplierModel();
+            $moldItem = new MoldItemModel();
+            $detail_mold = new DetailMold();
 
-        $supplierModel = new SupplierModel();
-        $moldItem = new MoldItemModel();
+            // Mengambil data dari form
+            $postData = $this->request->getPost([
+                'ITEM', 'MADE_IN', 'STATUS', 'Material', 'TONNAGE', 'PART',
+                'RUNNER', 'CYCLE_TIME', 'DIMENSI_MOLD', 'CAVITY', 'CORE', 'KETERANGAN'
+            ]);
 
-        // Mengambil data dari form
-        $postData = $this->request->getPost([
-            'ITEM', 'MADE_IN', 'STATUS', 'Material', 'TONNAGE', 'PART',
-            'RUNNER', 'CYCLE_TIME', 'DIMENSI_MOLD', 'CAVITY', 'CORE', 'KETERANGAN', 'supplier'
-        ]);
+            // Cek apakah ITEM sudah terdaftar
+            if ($moldItem->where('ITEM', $postData['ITEM'])->countAllResults() > 0) {
+                return $this->response->setJSON(['error' => 'Nama Mold sudah terdaftar, gunakan Nama lain.']);
+            }
 
-        // Validasi input
-        if (in_array('', $postData)) {
-            return $this->setAndRedirect('gagal', 'Isi semua data!');
+            // Mendapatkan NO terakhir
+            $lastNo = $moldItem->selectMax('NO')->first();
+            $newNo = isset($lastNo['NO']) ? $lastNo['NO'] + 1 : 1;
+
+            // Menyimpan data mold ke database dengan NO baru
+            $postData['NO'] = $newNo;
+            $moldItem->insert($postData);
+            //  $newID = $moldItem->insertID();
+
+            // Menyimpan data supplier ke database
+            $supplierModel->insert([
+                'tahun' => date('Y'),
+                'suplier' => $this->request->getPost('supplier'),
+                'id_mold' => $newNo,
+                'mold_name' => $postData['ITEM'],
+                'jumlah_produk' => 0
+            ]);
+
+
+            // Handle dokumen_mold2 (opsional)
+            $dokumen_mold2 = $this->request->getFile('dokumen_mold2');
+            $dokumen_mold3 = $this->request->getFile('dokumen_mold3');
+            $Gambar_mold = $this->request->getFile('Gambar_Mold');
+            $dokumen_mold = $this->request->getFile('dokumen_mold');
+            if ($dokumen_mold && $dokumen_mold->isValid() && !$dokumen_mold->hasMoved()) {
+                $dokumenmold2 = $dokumen_mold2->getRandomName();
+                $dokumen_mold2->move(ROOTPATH . 'public/uploads', $dokumenmold2);
+
+                $dokumenmold3 = $dokumen_mold3->getRandomName();
+                $dokumen_mold3->move(ROOTPATH . 'public/uploads', $dokumenmold3);
+
+
+                $gambarmold = $Gambar_mold->getRandomName();
+                $Gambar_mold->move(ROOTPATH . 'public/uploads', $gambarmold);
+
+
+                $dokumenmold = $dokumen_mold->getRandomName();
+                $dokumen_mold->move(ROOTPATH . 'public/uploads', $dokumenmold);
+                $detail_mold->insert([
+                    'Part_Name' => $postData['ITEM'],
+                    'User_ID' =>  $this->request->getPost('user_id'),
+                    'Mold_Id' => $newNo,
+                    'Gambar_Mold' => $gambarmold,
+                    'dokumen_mold' => $dokumenmold,
+                    'dokumen_mold2' => $dokumenmold2,
+                    'dokumen_mold3' => $dokumenmold3
+                ]);
+            } else {
+                return $this->response->setJSON(['error' => 'Dokumen Mold 1 is required and must be a valid file.']);
+            }
+
+
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
-
-        // Cek apakah ITEM sudah terdaftar
-        if ($moldItem->where('ITEM', $postData['ITEM'])->countAllResults() > 0) {
-            return $this->setAndRedirect('gagal', 'Nama Mold sudah terdaftar, gunakan Nama lain.');
-        }
-
-        // Mendapatkan NO terakhir
-        $lastNo = $moldItem->selectMax('NO')->first();
-        $newNo = isset($lastNo['NO']) ? $lastNo['NO'] + 1 : 1;
-
-        // Menyimpan data mold ke database dengan NO baru
-        $postData['NO'] = $newNo;
-        $moldItem->insert($postData);
-        //  $newID = $moldItem->insertID();
-
-        // Menyimpan data supplier ke database
-        $supplierModel->insert([
-            'tahun' => date('Y'),
-            'suplier' => $postData['supplier'],
-            'id_mold' => $newNo,
-            'mold_name' => $postData['ITEM'],
-            'jumlah_produk' => 0
-        ]);
-
-        return $this->setAndRedirect('sukses', 'Registrasi berhasil!');
     }
 
     public function all_product_mold()
@@ -704,6 +738,7 @@ class Admin extends BaseController
         try {
             $moldModel = new MoldItemModel();
             $suplierModel = new SupplierModel();
+            $detailModel = new DetailMold();
             $id = $this->request->getPost('id');
 
             // Cek apakah ID valid
@@ -719,14 +754,14 @@ class Admin extends BaseController
             $datasuplier = [
                 'mold_name' => $this->request->getPost('ITEM'),
             ];
-
-            // Debugging: Log data yang akan diupdate
-            log_message('info', 'Updating mold with ID: ' . $id);
-            log_message('info', 'Data to update: ' . print_r($datamold, true));
+            $datadetail = [
+                'Part_Name' => $this->request->getPost('ITEM'),
+            ];
 
             // Lakukan update
             $moldModel->update($id, $datamold);
             $suplierModel->where('id_mold', $id)->set($datasuplier)->update();
+            $detailModel->where('Mold_Id', $id)->set($datadetail)->update();
 
             return $this->response->setJSON(['message' => 'Data updated successfully!']);
         } catch (\Exception $e) {
@@ -745,7 +780,7 @@ class Admin extends BaseController
             $id = $this->request->getPost('id');
 
             // Cek apakah ID valid
-            
+
             $datasuplier = [
                 'suplier' => $this->request->getPost('suplier'),
 
@@ -757,5 +792,207 @@ class Admin extends BaseController
             log_message('error', 'Update error: ' . $e->getMessage());
             return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
+    }
+
+
+    public function submit_dokumen()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+
+        try {
+            $detail_mold = new DetailMold();
+            $id = $this->request->getPost('id');
+            $datamold = [];
+
+            // Handle dokumen_mold (wajib)
+            $dokumen_mold = $this->request->getFile('dokumen_mold');
+            if ($dokumen_mold && $dokumen_mold->isValid() && !$dokumen_mold->hasMoved()) {
+                $dokumenmold = $dokumen_mold->getRandomName();
+                $dokumen_mold->move(ROOTPATH . 'public/uploads', $dokumenmold);
+                $datamold['dokumen_mold'] = $dokumenmold;
+            } else {
+                return $this->response->setJSON(['error' => 'Dokumen Mold 1 is required and must be a valid file.']);
+            }
+
+            // Handle dokumen_mold2 (opsional)
+            $dokumen_mold2 = $this->request->getFile('dokumen_mold2');
+            if ($dokumen_mold2 && $dokumen_mold2->isValid() && !$dokumen_mold2->hasMoved()) {
+                $dokumenmold2 = $dokumen_mold2->getRandomName();
+                $dokumen_mold2->move(ROOTPATH . 'public/uploads', $dokumenmold2);
+                $datamold['dokumen_mold2'] = $dokumenmold2;
+            }
+
+            // Handle dokumen_mold3 (opsional)
+            $dokumen_mold3 = $this->request->getFile('dokumen_mold3');
+            if ($dokumen_mold3 && $dokumen_mold3->isValid() && !$dokumen_mold3->hasMoved()) {
+                $dokumenmold3 = $dokumen_mold3->getRandomName();
+                $dokumen_mold3->move(ROOTPATH . 'public/uploads', $dokumenmold3);
+                $datamold['dokumen_mold3'] = $dokumenmold3;
+            }
+
+            // Update data jika dokumen_mold (wajib) sudah terisi
+            $detail_mold->update($id, $datamold);
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    public function update_dokumen()
+    {
+        try {
+            $id_dokumen = $this->request->getPost('id');
+
+            // Ambil data lama dari database
+            $model = new DetailMold();
+            $existingData = $model->find($id_dokumen);
+
+
+            // Handle file uploads
+            $dokumen_mold = $this->request->getFile('dokumen_mold');
+            $dokumen_mold2 = $this->request->getFile('dokumen_mold2');
+            $dokumen_mold3 = $this->request->getFile('dokumen_mold3');
+            // Hapus gambar diperbaiki lama jika ada file baru yang diupload
+            if ($dokumen_mold && $dokumen_mold->isValid()) {
+                if (!empty($existingData['dokumen_mold']) && file_exists(ROOTPATH . 'public/uploads/' . $existingData['dokumen_mold'])) {
+                    unlink(ROOTPATH . 'public/uploads/' . $existingData['dokumen_mold']); // Hapus file lama
+                }
+                $dokumen_moldname = $dokumen_mold->getRandomName();
+                $dokumen_mold->move(ROOTPATH . 'public/uploads', $dokumen_moldname);
+            } else {
+                return $this->response->setJSON(['error' => 'Dokumen Mold 1 harus diisi']);
+            }
+
+            if ($dokumen_mold2 && $dokumen_mold2->isValid()) {
+                if (!empty($existingData['dokumen_mold2']) && file_exists(ROOTPATH . 'public/uploads/' . $existingData['dokumen_mold2'])) {
+                    unlink(ROOTPATH . 'public/uploads/' . $existingData['dokumen_mold2']); // Hapus file lama
+                }
+                $dokumen_mold2name = $dokumen_mold2->getRandomName();
+                $dokumen_mold2->move(ROOTPATH . 'public/uploads', $dokumen_mold2name);
+            } else {
+                return $this->response->setJSON(['error' => 'Dokumen Mold 2 harus diisi']);
+            }
+
+            if ($dokumen_mold3 && $dokumen_mold3->isValid()) {
+                if (!empty($existingData['dokumen_mold3']) && file_exists(ROOTPATH . 'public/uploads/' . $existingData['dokumen_mold3'])) {
+                    unlink(ROOTPATH . 'public/uploads/' . $existingData['dokumen_mold3']); // Hapus file lama
+                }
+                $dokumen_mold3name = $dokumen_mold3->getRandomName();
+                $dokumen_mold3->move(ROOTPATH . 'public/uploads', $dokumen_mold3name);
+            } else {
+                return $this->response->setJSON(['error' => 'Dokumen Mold 3 harus diisi']);
+            }
+
+
+            $data = [
+                'dokumen_mold' => $dokumen_moldname,
+                'dokumen_mold2' => $dokumen_mold2name,
+                'dokumen_mold3' => $dokumen_mold3name,
+            ];
+
+            // Update the database
+            $model->update($id_dokumen, $data);
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    public function suplier_cbi()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        $user = new UserModel();
+        $GetUser = $user->getUser();
+        $dataUser['data'] = $GetUser;
+        return view('pages/admin/dashboard/suplier', $dataUser);
+    }
+    public function detail_suplier_cbi()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        $moldItem = new MoldItemModel();
+        $user = new UserModel();
+        $supplierId = $this->request->getGet('supplier');
+        if ($supplierId) {
+            $data['data_profil'] = $user->getUserByUsername($supplierId);
+            $data['data_mold'] = $moldItem->getItemBySupplier($supplierId);
+        }
+
+        return view('pages/admin/dashboard/detail_suplier', $data);
+    }
+    public function updateAddressSupplier()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        $userModel = new UserModel();
+        $address = $this->request->getPost('address');
+        $supplier = $this->request->getPost('supplier');
+        $username = $this->request->getPost('username'); // Pastikan username dikirim dari form
+        // Update password di database berdasarkan username
+        $userModel->where('username', $username)
+            ->set('suplier', $supplier)
+            ->set('address', $address)
+            ->update();
+
+        // Kembalikan notifikasi sukses
+        return redirect()->to(base_url("detail/suplier?supplier=" . urlencode((string)$supplier)))
+        ->with('success', 'Data updated successfully.');
+    }
+
+    public function deleteAccount()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        $userModel = new UserModel();
+        $username = $this->request->getPost('username');
+        // Hapus akun berdasarkan session user_id
+        $userModel->where('username', $username)
+            ->delete();
+        return redirect()->to(base_url("suplier/cbi"))->with('status', 'Account deleted successfully!');
+    }
+
+    public function changePassword()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        // Mendapatkan data dari form
+        $username = $this->request->getPost('username');
+        $suplier = $this->request->getPost('suplier');
+        $newPassword = $this->request->getPost('new_password');
+        $confirmPassword = $this->request->getPost('confirm_password');
+
+        // Validasi jika password baru dan konfirmasi password cocok
+        if (
+            $newPassword !== $confirmPassword
+        ) {
+            // Password tidak sama, kembalikan error
+            return redirect()->back()->with('error', 'New password and confirmation do not match.');
+        }
+
+        // Hash password baru
+        $hashedPassword = password_hash((string)$newPassword, PASSWORD_DEFAULT);
+
+        // Load model user
+        $userModel = new UserModel();
+
+        // Update password di database berdasarkan username
+        $userModel->where('username', $username)
+            ->set('password', $hashedPassword)
+            ->update();
+
+        // Kembalikan notifikasi sukses
+        return redirect()->to(base_url("detail/suplier?supplier=" . urlencode((string)$suplier)))
+        ->with('success', 'Password updated successfully.');
+      
     }
 }

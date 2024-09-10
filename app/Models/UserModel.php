@@ -20,7 +20,7 @@ class UserModel extends Model
     }
 
 
-    public function getUserByUsername($userId)
+    public function getUserById($userId)
     {
         return $this->where('id', $userId)->first();
     }
@@ -85,10 +85,10 @@ class UserModel extends Model
         return $this->db->table('users')->countAllResults();
     }
 
-    public function getUserById($userId)
+    public function getUserByUsername($username)
     {
-        return $this->where('User_ID', $userId)
-            ->orderBy('Tanggal_Update', 'DESC')
+        return $this->select('username , role , suplier , address')
+        ->where('suplier', $username)
             ->first();
     }
 }

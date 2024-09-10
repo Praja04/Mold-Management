@@ -77,7 +77,7 @@ class PerbaikanBesarModel extends Model
 
         $builder = $this->db->table($this->table)
             ->select('SUM(CASE WHEN terima_perbaikan = \'no\' THEN 1 ELSE 0 END) AS terima_perbaikan_0')
-            ->select('SUM(CASE WHEN terima_perbaikan = \'yes\' AND visit = 0 THEN 1 ELSE 0 END) AS terima_perbaikan_1');
+            ->select('SUM(CASE WHEN terima_perbaikan = \'yes\' AND temporary IS NULL  THEN 1 ELSE 0 END) AS terima_perbaikan_1');
 
         return $builder->get()->getRowArray();
     }

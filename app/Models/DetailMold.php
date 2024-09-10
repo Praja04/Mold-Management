@@ -8,7 +8,7 @@ class DetailMold extends Model
 {
     protected $table = 'detail_mold';
     protected $primaryKey = 'Id';
-    protected $allowedFields = ['Mold_Id', 'User_ID', 'Part_Name', 'Gambar_Mold', 'Deskripsi_Mold', 'Gambar_Part', 'Deskripsi_Part', 'Gambar_Runner', 'Deskripsi_Runner', 'Tanggal_Update', 'Posisi_Mold', 'Drawing_Produk', 'Subject_Mold', 'Subject_Tool', 'Subject_Mesin', 'Subject_Produk', 'Subject_Proses', 'Subcount_Suplier', 'Validasi_Ke', 'LK3', 'Spesifikasi', 'Hasil_Verifikasi','created_at'];
+    protected $allowedFields = ['Mold_Id', 'User_ID', 'Part_Name', 'Gambar_Mold','dokumen_mold','dokumen_mold2','dokumen_mold3','created_at'];
     protected $useAutoIncrement = true;
     protected $useTimestamps = false;
 

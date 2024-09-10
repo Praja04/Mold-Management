@@ -333,7 +333,7 @@ class User extends BaseController
         // Instansiasi model UserModel
         $formModel = new UserModel();
         // Panggil fungsi dari model untuk mendapatkan data berdasarkan User_ID
-        $userData['data_user'] = $formModel->getUserByUsername($userId);
+        $userData['data_user'] = $formModel->getUserById($userId);
 
         // Periksa apakah data ditemukan
         if ($userData) {

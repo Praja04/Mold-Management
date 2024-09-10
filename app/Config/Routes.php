@@ -87,3 +87,13 @@ $routes->post('update/perbaikan', 'Admin::updatePerbaikan');
 $routes->post('update/status/mold', 'Admin::update_status_mold');
 $routes->post('update/data/ITEM', 'Admin::update_data_ITEM');
 $routes->post('pemindahan/mold', 'Admin::pemindahan_mold');
+$routes->post('submit/dokumen', 'Admin::submit_dokumen');
+$routes->post('update/dokumen', 'Admin::update_dokumen');
+$routes->get('suplier/cbi', 'Admin::suplier_cbi');
+$routes->get('detail/suplier', 'Admin::detail_suplier_cbi');
+$routes->post('user/updateAddressSupplier', 'Admin::updateAddressSupplier');
+$routes->post('user/deleteAccount', 'Admin::deleteAccount');
+$routes->post('user/changePassword', 'Admin::changePassword');
+
+
+
