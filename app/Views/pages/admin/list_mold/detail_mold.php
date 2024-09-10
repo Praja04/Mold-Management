@@ -6,7 +6,8 @@
     <div class="container-full">
         <!-- Content Header (Page header) -->
         <div class="content-header">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center justify-content-between">
+                <!-- Bagian Kiri -->
                 <div class="me-auto">
                     <h3 class="page-title">Details</h3>
                     <div class="d-inline-block align-items-center">
@@ -25,8 +26,36 @@
                         </nav>
                     </div>
                 </div>
+
+                <!-- Bagian Kanan -->
+                <div class="list-inline text-end">
+                    <div class="form-group">
+                        <?php if (!empty($detail['dokumen_mold'])) : ?>
+                            <?php if ($detail['dokumen_mold'] == null) : ?>
+                                <button data-bs-toggle="modal" data-bs-target="#modal-dokumen" class="btn btn-info" style="font-size: small;">Upload Dokumen Mold <span id="dokumen" class="mdi mdi-file-document"></span></button>
+                            <?php else : ?>
+                                <li class="dropdown">
+                                    <button class="dropdown-toggle btn btn-primary-light px-10" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                                        Dokumen Mold
+                                    </button>
+
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                        <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold']); ?>">Dokumen 1</a>
+                                        <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold2']); ?>">Dokumen 2</a>
+                                        <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold3']); ?>">Dokumen 3</a>
+                                        <a data-bs-toggle="modal" data-id-dokumen="<?= $detail['Id'] ?>" data-bs-target="#modal-update-dokumen" class=" dropdown-item active bg-warning text-white">Ubah Dokumen</a>
+                                    </div>
+
+                                </li>
+                            <?php endif; ?>
+                        <?php else : ?>
+                            <button data-bs-toggle="modal" data-bs-target="#modal-dokumen" class="btn btn-info" style="font-size: small;">Upload Dokumen Mold <span id="dokumen" class="mdi mdi-file-document"></span></button>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
+
         <!-- Main content -->
         <section class="content">
             <div class="row">
@@ -51,11 +80,9 @@
                                 <div class="col-md-8 col-sm-6">
                                     <div class="col-md-8">
                                         <h2 class="box-title mt-0"><?= $moldData[0]['ITEM'] ?></h2>
-                                        <span id="update-ITEM" class="btn" data-bs-toggle="modal" data-bs-target="#modal-update-ITEM"> <i class="mdi mdi-lead-pencil mdi-24px"></i></span>
+                                        <span id="update-ITEM" class="btn" data-bs-toggle="modal" data-bs-target="#modal-update-ITEM"> <i class="mdi mdi-lead-pencil mdi-18px"></i></span>
                                     </div>
-                                    <div class="list-inline">
-                                        <span class="badge badge-info"><?= $moldData[0]['STATUS'] ?></span>
-                                    </div>
+
                                     <hr>
                                     <div class="row">
                                         <div class="col-sm-12">
@@ -178,10 +205,7 @@
                                                         <a style="margin-left: 15px;" class="btn btn-primary text-white me-0" href="<?= base_url('perbaikan/besar/detail') ?>?namaMold=<?= urlencode($moldData[0]['ITEM']) ?>"><span class="mdi mdi-package-variant"></span> perbaikan</a>
                                                     </td>
                                                 </tr>
-
-
                                             </tbody>
-
                                         </table>
                                     </div>
                                 </div>
@@ -191,6 +215,93 @@
                 </div>
             </div>
         </section>
+
+        <div class="modal center-modal fade" id="modal-update-dokumen" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="height: max-content;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Update Dokumen Mold</h5>
+                    </div>
+                    <div class="modal-body">
+
+                        <form id="dokumen_mold">
+                            <input type="hidden" id="update_id_dokumen" name="id_mold">
+                            <div class="form-group">
+                                <label class="form-label">Dokumen Mold 1 :</label>
+                                <input type="file" class="form-control" id="update_dokumen_mold">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Dokumen Mold 2 :</label>
+                                <input type="file" class="form-control" id="update_dokumen_mold2">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Dokumen Mold 3 :</label>
+                                <input type="file" class="form-control" id="update_dokumen_mold3">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer modal-footer-uniform">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="update-button-dokumen" class="btn btn-primary float-end">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal center-modal fade" id="modal-dokumen" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="height: max-content;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Dokumen Pendukung Mold</h5>
+                    </div>
+                    <div class="modal-body">
+
+                        <?php if (!empty($detail['Gambar_Mold'])) : ?>
+                            <form id="upload_dokumen_mold">
+                                <input type="hidden" id="id_dokumen" name="id_mold" value="<?= $detail['Id']; ?>">
+                                <div class="form-group">
+                                    <label class="form-label">Dokumen Mold 1 :</label>
+                                    <input type="file" class="form-control" id="dokumen_mold">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Dokumen Mold 2 :</label>
+                                    <input type="file" class="form-control" id="dokumen_mold2">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Dokumen Mold 3 :</label>
+                                    <input type="file" class="form-control" id="dokumen_mold3">
+                                </div>
+                            </form>
+                        <?php else : ?>
+                            <p>Upload Gambar Dahulu</p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="modal-footer modal-footer-uniform">
+                        <?php if (!empty($detail['Gambar_Mold'])) : ?>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                            <button type="button" id="save-button-dokumen" class="btn btn-primary float-end">Save changes</button>
+                        <?php else : ?>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="pdfModalLabel">Dokumen View</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <embed id="pdfViewer" src="" type="application/pdf" width="100%" height="600px">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal center-modal fade" id="modal-suplier" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content" style="height: max-content;">
@@ -459,6 +570,12 @@
     $(document).ready(function() {
         const baseUrl = "<?= base_url() ?>";
 
+        $('.btn-pdf-modal').on('click', function() {
+            var pdfUrl = $(this).data('pdf');
+            $('#pdfViewer').attr('src', pdfUrl);
+            $('#pdfModal').modal('show');
+        });
+
         $('#product-image').on('click', function() {
             $('#imageModal').modal('show');
         });
@@ -475,6 +592,10 @@
             var button = $(event.relatedTarget);
             var modal = $(this);
         });
+        $('#modal-dokumen').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+        });
         $('#modal-update-status').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget);
             var modal = $(this);
@@ -484,6 +605,12 @@
             var idMold = button.data('id');
             var modal = $(this);
             modal.find('#id_pindah').val(idMold);
+        });
+        $('#modal-update-dokumen').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var idMold = button.data('id-dokumen');
+            var modal = $(this);
+            modal.find('#update_id_dokumen').val(idMold);
         });
 
         $('#submitBtn').on('click', function() {
@@ -544,6 +671,75 @@
                 }
             });
         });
+        $('#save-button-dokumen').on('click', function() {
+
+            var formData = new FormData();
+            formData.append('id', $('#id_dokumen').val());
+            formData.append('dokumen_mold', $('#dokumen_mold')[0].files[0]);
+            formData.append('dokumen_mold2', $('#dokumen_mold2')[0].files[0]);
+            formData.append('dokumen_mold3', $('#dokumen_mold3')[0].files[0]);
+
+            $.ajax({
+                url: baseUrl + 'submit/dokumen',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.hasOwnProperty('message')) {
+                        $('#modalok').on('click', function() {
+                            location.reload(); // Redirect to the specified URL
+                        });
+                        showModal(response.message);
+                    } else if (response.hasOwnProperty('error')) {
+                        showModal(response.error, true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Display more detailed error message in the UI
+                    var errorMessage = 'Error ' + xhr.status + ': ' + xhr.statusText;
+                    if (xhr.responseText) {
+                        errorMessage += ' - ' + xhr.responseText;
+                    }
+                    showModal(errorMessage, true);
+                }
+            });
+        });
+        $('#update-button-dokumen').on('click', function() {
+
+            var formData = new FormData();
+            formData.append('id', $('#update_id_dokumen').val());
+            formData.append('dokumen_mold', $('#update_dokumen_mold')[0].files[0]);
+            formData.append('dokumen_mold2', $('#update_dokumen_mold2')[0].files[0]);
+            formData.append('dokumen_mold3', $('#update_dokumen_mold3')[0].files[0]);
+
+            $.ajax({
+                url: baseUrl + 'update/dokumen',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.hasOwnProperty('message')) {
+                        $('#modalok').on('click', function() {
+                            location.reload(); // Redirect to the specified URL
+                        });
+                        showModal(response.message);
+                    } else if (response.hasOwnProperty('error')) {
+                        showModal(response.error, true);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Display more detailed error message in the UI
+                    var errorMessage = 'Error ' + xhr.status + ': ' + xhr.statusText;
+                    if (xhr.responseText) {
+                        errorMessage += ' - ' + xhr.responseText;
+                    }
+                    showModal(errorMessage, true);
+                }
+            });
+        });
+
 
         $('#save-button').on('click', function() {
             var formData = new FormData();
@@ -647,6 +843,9 @@
                 success: function(response) {
                     if (response.success) {
                         $('#deleteModal').modal('hide'); // Hide the modal
+                        $('#modalok').on('click', function() {
+                            window.location.href = '<?= base_url('products/mold') ?>'; // Redirect to the specified URL
+                        });
                         showModal('Data deleted successfully.');
 
                     } else {
@@ -675,9 +874,7 @@
                 });
             }
 
-            $('#modalok').on('click', function() {
-                window.location.href = '<?= base_url('products/mold') ?>'; // Redirect to the specified URL
-            });
+
         }
 
         function showToast(message, isError = false) {

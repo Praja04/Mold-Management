@@ -16,11 +16,12 @@
 							</a>
 							<ul class="treeview-menu">
 								<li><a href="<?= base_url('dashboard-admin') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Dashboard</a></li>
+								<li><a href="<?= base_url('suplier/cbi') ?>"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Suplier</a></li>
 							</ul>
 						</li>
 						<li class="treeview">
 							<a href="#">
-								<i class="icon-Layout-grid"><span class="path1"></span><span class="path2"></span></i>
+								<i class="fa fa-exclamation-triangle" style="font-size: 16px;"><span class="path1"></span><span class="path2"></span></i>
 								<span>Report</span>
 								<span class="pull-right-container" id="pengajuan_user">
 									<i class="fa fa-angle-right pull-right"></i>
@@ -46,7 +47,7 @@
 						</li> -->
 						<li class="treeview">
 							<a href="#">
-								<i class="icon-Layout-grid"><span class="path1"></span><span class="path2"></span></i>
+								<i class="fa fa-registered" style="font-size: 16px;"><span class="path1"></span><span class="path2"></span></i>
 								<span>Registration</span>
 								<span class="pull-right-container">
 									<i class="fa fa-angle-right pull-right"></i>
@@ -60,7 +61,7 @@
 						</li>
 						<li class="treeview">
 							<a href="#">
-								<i class="icon-Layout-grid"><span class="path1"></span><span class="path2"></span></i>
+								<i class="fa fa-bitbucket" style="font-size: 16px;"><span class="path1"></span><span class="path2"></span></i>
 								<span>Products Mold</span>
 								<span class="pull-right-container">
 									<i class="fa fa-angle-right pull-right"></i>

@@ -21,7 +21,7 @@
                 </div>
 
                 <div class="col-xl-3 col-md-6 col-12"></div>
-                <div class="col-xl-3 col-md-6 col-12">
+                <!-- <div class="col-xl-3 col-md-6 col-12">
                     <div class="box bg-secondary-light pull-up">
                         <div class="box-body">
                             <div class="flex-grow-1">
@@ -54,7 +54,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
             </div>
 
@@ -75,7 +75,7 @@
                                                 <th>No</th>
                                                 <th>User</th>
                                                 <th>Suplier</th>
-                                                <th>Belum Dibaca</th>
+                                                <!-- <th>Belum Dibaca</th> -->
                                                 <th>All Report</th>
                                             </tr>
                                         </thead>
@@ -86,7 +86,7 @@
                                                     <td><?= $i++; ?></td>
                                                     <td><?= $user['username']; ?></td>
                                                     <td><?= $user['suplier']; ?></td>
-                                                    <td>
+                                                    <!-- <td>
                                                         <?php if ($perbaikanCounts[$user['id']] != 0) : ?>
                                                             <a href="<?= base_url('list/mold/daily') ?>?supplier=<?= urlencode($user['suplier']) ?>" class="btn btn-danger text-white me-0">
                                                                 <?= $perbaikanCounts[$user['id']] ?>
@@ -98,7 +98,7 @@
                                                         <?php endif; ?>
 
                                                     </td>
-                                                    
+                                                     -->
                                                     <td>
                                                         <a class="btn btn-secondary me-0" href="<?= base_url('list/mold/daily') ?>?supplier=<?= urlencode($user['suplier']) ?>"><span class="ti ti-eye"></a>
 

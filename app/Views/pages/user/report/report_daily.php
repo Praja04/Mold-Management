@@ -237,6 +237,7 @@
             }
         });
 
+
         $('#addNgBtn').click(function() {
             if (ngCount < maxNgItems) {
                 const index = ngCount + 1; // Increment for the new item

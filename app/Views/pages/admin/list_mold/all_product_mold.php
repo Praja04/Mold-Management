@@ -77,7 +77,7 @@
                                                 <td>
                                                     <?php if (!empty($mold['Gambar_Mold'])) : ?>
                                                         <a href="<?= base_url('detail/mold') ?>?namaMold=<?= urlencode($mold['ITEM']) ?>">
-                                                            <img src="<?= base_url('uploads/' . $mold['Gambar_Mold']) ?>" alt="" width="80" />
+                                                            <img src="<?= base_url('uploads/' . $mold['Gambar_Mold']) ?>" alt="" style="width: 80px; height:60px;" />
                                                         </a>
                                                     <?php else :  ?>
                                                         Belum ada gambar

@@ -161,7 +161,7 @@
         const user = data.data_user;
         $('#suplier').text(user.suplier);
         $('#nama').text('Welcome ' + user.username + ' !');
-
+        console.log(user.username);
 
       },
       error: function(xhr, status, error) {

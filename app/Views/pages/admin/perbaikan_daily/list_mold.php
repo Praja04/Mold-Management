@@ -21,8 +21,8 @@
                                                 <th>No</th>
                                                 <th>Nama Mold</th>
                                                 <th>Total Produksi</th>
-                                                <th>Pengiriman Belum Approved</th>
-                                                <th>Pengiriman Sudah Approved</th>
+                                                <!-- <th>Pengiriman Belum Approved</th>
+                                                 <th>Pengiriman Sudah Approved</th> -->
                                                 <th>History Report</th>
                                                 <th>Update Data Hasil Produksi</th>
                                             </tr>
@@ -35,7 +35,7 @@
                                                     <td><?= $i++; ?></td>
                                                     <td><?= $user['ITEM']; ?></td>
                                                     <td><?= $user['Total_Produk'] ?></td>
-                                                    <td>
+                                                    <!-- <td>
                                                         <a href=" <?= base_url('daily/detail/no') ?>?namaMold=<?= urlencode($user['ITEM']) ?>" class="btn btn-<?= $user['Hasil_Verifikasi_Count_No'] > 0 ? 'danger' : 'primary' ?> text-white me-0">
                                                             <?= $user['Hasil_Verifikasi_Count_No']; ?>
                                                         </a>
@@ -46,7 +46,7 @@
                                                             <?= $user['Hasil_Verifikasi_Count_Yes']; ?>
                                                         </a>
 
-                                                    </td>
+                                                    </td> -->
                                                     <td>
                                                         <a class="btn btn-primary text-white me-0" href="<?= base_url('daily/detail') ?>?namaMold=<?= urlencode($user['ITEM']) ?>">Report Daily</a>
                                                     </td>

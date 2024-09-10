@@ -2,15 +2,6 @@
 
 <?= $this->section('content'); ?>
 <div class="sticky-toolbar" style="width: 110px;border-radius: 10px 0 0 10px; background-color: rgba(108, 117, 125, 0.3);">
-    <!-- <a data-bs-toggle="tooltip" data-bs-placement="left" title="Buy Now" class="waves-effect waves-light btn btn-success btn-flat mb-5 btn-sm" target="_blank">
-        <span class="icon-Money"><span class="path1"></span><span class="path2"></span></span>
-    </a>
-    <a href="https://themeforest.net/user/multipurposethemes/portfolio" data-bs-toggle="tooltip" data-bs-placement="left" title="Portfolio" class="waves-effect waves-light btn btn-danger btn-flat mb-5 btn-sm" target="_blank">
-        <span class="icon-Image"></span>
-    </a>
-    <a id="chat-popup" href="#" data-bs-toggle="tooltip" data-bs-placement="left" title="Live Chat" class="waves-effect waves-light btn btn-warning btn-flat btn-sm">
-        <span class="icon-Group-chat"><span class="path1"></span><span class="path2"></span></span>
-    </a> -->
     <span class="badge badge-primary">Filter</span>
     <label class="form-label">Tahun :</label>
     <select id="yearFilter" class="form-select"></select>
@@ -45,46 +36,43 @@
             <div class="row">
                 <div class="col-xl-3 col-md-6 col-12"></div>
                 <div class="col-xl-3 col-md-6 col-12">
-                    <div class="box bg-secondary-light pull-up">
-                        <div class="box-body" style="height: 150px;">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center pe-2 justify-content-between">
-                                    <div class="d-flex">
-                                        <span class="badge badge-primary me-15">Active</span>
-                                        <span class="badge badge-primary me-5"><i class="fa fa-lock"></i></span>
-                                        <span class="badge badge-primary"><i class="fa fa-clock-o"></i></span>
-                                    </div>
-                                    <div class="dropdown">
+                    <a href="<?= base_url('products/mold') ?>">
+                        <div class="box bg-secondary-light pull-up">
+                            <div class="box-body" style="height: 150px;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center pe-2 justify-content-between">
+                                        <div class="d-flex">
+                                            <span class="badge badge-primary me-15">Active</span>
+                                            <span class="badge badge-primary me-5"><i class="fa fa-lock"></i></span>
+                                            <span class="badge badge-primary"><i class="fa fa-clock-o"></i></span>
+                                        </div>
+                                        <div class="dropdown">
 
+                                        </div>
                                     </div>
+                                    <h4 class="mt-25 mb-5"><?= $totalItem ?> Mold</h4>
+                                    <p class="text-fade mb-0 fs-12">Total Mold CBI</p>
                                 </div>
-                                <h4 class="mt-25 mb-5"><?= $totalItem ?> Mold</h4>
-                                <p class="text-fade mb-0 fs-12">Total Mold CBI</p>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-xl-3 col-md-6 col-12">
-                    <div class="box bg-secondary-light pull-up">
-                        <div class="box-body" style="height: 150px;">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center pe-2 justify-content-between">
-                                    <div class="d-flex">
-                                        <span class="badge badge-dark me-15">User</span>
+                    <a href="<?= base_url('suplier/cbi') ?>">
+                        <div class="box bg-secondary-light pull-up">
+                            <div class="box-body" style="height: 150px;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center pe-2 justify-content-between">
+                                        <div class="d-flex">
+                                            <span class="badge badge-dark me-15">User</span>
+                                        </div>
                                     </div>
-                                    <!-- <div class="dropdown">
-                                        <form>
-                                            <select class="form-select" id="suplier">
-                                                <option value="">Pilih Item</option>
-                                            </select>
-                                        </form>
-                                    </div> -->
+                                    <h4 class="mt-25 mb-5"><?= $totalUser ?> Supplier</h4>
+                                    <p class="text-fade mb-0 fs-12">Total Supplier</p>
                                 </div>
-                                <h4 class="mt-25 mb-5"><?= $totalUser ?> Supplier</h4>
-                                <p class="text-fade mb-0 fs-12">Total Supplier</p>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
 
@@ -125,7 +113,10 @@
     </div>
     </section>
 </div>
+<div id="loading" style="display: none;">
+    <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." />
 </div>
+
 <script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
 <script src="<?= base_url() ?>assets/js/highcharts/highcharts.js" type="text/javascript"></script>
 <!-- <script>
@@ -496,10 +487,13 @@
                 perbaikanData = perbaikanResponse.jumlah_perbaikan;
                 rejectionData = rejectionResponse.reject;
                 quantityData = quantityResponse.data;
-
-                // Populate the filters
+                // Display total shots without filtering
                 populateYearFilter();
                 populateMonthFilter();
+                filterAndRenderCharts();
+                renderTotalAkumulasiShots();
+                renderTotalAkumulasiRejection();
+                // Populate the filters
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -511,6 +505,9 @@
             const yearFilter = $('#yearFilter');
             yearFilter.empty();
 
+            // Add "All" option
+            yearFilter.append('<option value="0">All</option>');
+
             for (let year = currentYear - 5; year <= currentYear; year++) {
                 yearFilter.append(`<option value="${year}">${year}</option>`);
             }
@@ -518,10 +515,17 @@
             yearFilter.change(function() {
                 const selectedYear = parseInt($(this).val(), 10);
                 const selectedMonth = parseInt($('#monthFilter').val(), 10);
+                if (selectedYear === 0) {
+                    $('#monthFilter').hide(); // Hide month filter
+                } else {
+                    $('#monthFilter').show(); // Show month filter
+                }
+
                 filterAndRenderCharts(selectedYear, selectedMonth);
             });
 
-            yearFilter.val(currentYear);
+            // yearFilter.val(currentYear);
+
         }
 
         function populateMonthFilter() {
@@ -532,7 +536,6 @@
             ];
             const monthFilter = $('#monthFilter');
             monthFilter.empty();
-
             months.forEach((month, index) => {
                 const monthNumber = index + 1;
                 monthFilter.append(`<option value="${monthNumber}">${month}</option>`);
@@ -545,18 +548,160 @@
             });
 
             const currentMonth = now.getMonth() + 1;
-            monthFilter.val(currentMonth).trigger('change');
+            //monthFilter.val(currentMonth).trigger('change');
         }
 
+        function renderTotalAkumulasiShots() {
+            // Group data by `nama_mold` and calculate total shots per mold
+            const totalShotsByMold = accumulatedShotsData.reduce((acc, shot) => {
+                if (!acc[shot.nama_mold]) {
+                    acc[shot.nama_mold] = 0;
+                }
+                acc[shot.nama_mold] += shot.total;
+                return acc;
+            }, {});
+
+            // Convert the object to an array of [nama_mold, totalShots] and sort it by totalShots in descending order
+            const sortedShots = Object.entries(totalShotsByMold).sort((a, b) => b[1] - a[1]);
+
+            // Extract sorted categories (nama_mold) and values (totalShots)
+            const categoriesShot = sortedShots.map(item => item[0]);
+            const akumulasiShotData = sortedShots.map(item => item[1]);
+
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Total Keseluruhan Akumulasi Shot per-mold'
+                },
+                xAxis: {
+                    categories: categoriesShot,
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Jumlah Akumulasi Shot'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return Highcharts.numberFormat(this.value, 0, '.', ',');
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td><td style="padding:0"><b>{point.y:,.0f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Akumulasi Shot',
+                    data: akumulasiShotData.map(value => ({
+                        y: value,
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return Highcharts.numberFormat(this.y, 0, '.', ',');
+                            }
+                        }
+                    }))
+                }]
+            });
+        }
+
+        function renderTotalAkumulasiRejection() {
+            // Group data by `nama_mold` and calculate total shots per mold
+            const totalRejectionByMold = rejectionData.reduce((acc, reject) => {
+                if (!acc[reject.suplier]) {
+                    acc[reject.suplier] = 0;
+                }
+                acc[reject.suplier] += reject.total_jumlah_ng;
+                return acc;
+            }, {});
+
+            // Convert the object to an array of [nama_mold, totalShots] and sort it by totalShots in descending order
+            const sortedRejct = Object.entries(totalRejectionByMold).sort((a, b) => b[1] - a[1]);
+
+            // Extract sorted categories (nama_mold) and values (totalShots)
+            const categoriesReject = sortedRejct.map(item => item[0]);
+            const akumulasiRejectData = sortedRejct.map(item => item[1]);
+
+            Highcharts.chart('container5', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Total Keseluruhan Akumulasi Reject per-Supplier'
+                },
+                xAxis: {
+                    categories: categoriesReject,
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Jumlah Akumulasi Rejection'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return Highcharts.numberFormat(this.value, 0, '.', ',');
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td><td style="padding:0"><b>{point.y:,.0f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Akumulasi Rejection',
+                    data: akumulasiRejectData.map(value => ({
+                        y: value,
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return Highcharts.numberFormat(this.y, 0, '.', ',');
+                            }
+                        }
+                    }))
+                }]
+            });
+        }
+
+
         function filterAndRenderCharts(selectedYear, selectedMonth) {
-            const filteredShots = accumulatedShotsData.filter(item => item.year === selectedYear && item.month === selectedMonth);
-            const filteredReports = reportData.filter(item => item.year === selectedYear && item.month === selectedMonth);
-            const filteredPerbaikan = perbaikanData.filter(item => item.year === selectedYear && item.month === selectedMonth);
-            const filteredRejection = rejectionData.filter(item => item.tahun === selectedYear && item.bulan === selectedMonth);
+            if (selectedYear === 0) {
+                renderTotalAkumulasiShots();
+                renderTotalAkumulasiRejection();
+            } else {
+                const filteredShots = accumulatedShotsData.filter(item => item.year === selectedYear && item.month === selectedMonth);
+                const filteredReports = reportData.filter(item => item.year === selectedYear && item.month === selectedMonth);
+                const filteredPerbaikan = perbaikanData.filter(item => item.year === selectedYear && item.month === selectedMonth);
+                const filteredRejection = rejectionData.filter(item => item.tahun === selectedYear && item.bulan === selectedMonth);
 
-            console.log('Filtered Rejection:', filteredRejection);
 
-            renderCharts(filteredShots, filteredReports, filteredPerbaikan, filteredRejection);
+
+                renderCharts(filteredShots, filteredReports, filteredPerbaikan, filteredRejection);
+            }
+
+
         }
 
         function renderCharts(filteredShots, filteredReports, filteredPerbaikan, filteredRejection) {
@@ -570,7 +715,7 @@
                     type: 'column'
                 },
                 title: {
-                    text: 'Akumulasi Shot per-mold'
+                    text: 'Akumulasi Shot per-mold (filtered)'
                 },
                 xAxis: {
                     categories: categoriesShot,
@@ -692,7 +837,7 @@
                 }]
             });
 
-            // Akumulasi Rejection Mold chart
+            // Data Rejection dan Kategori
             const categoriesQuantity = [
                 'Setup Mesin', 'Cuci Barel', 'Cuci Mold', 'Unfil', 'Bubble',
                 'Crack', 'Blackdot', 'Undercut', 'Belang', 'Scratch',
@@ -721,6 +866,20 @@
                 quantityData.total_bushing || 0
             ];
 
+            // Menggabungkan data dan kategori ke dalam satu array
+            const dataWithCategories = categoriesQuantity.map((category, index) => ({
+                category: category,
+                value: akumulasiRejectionData[index]
+            }));
+
+            // Mengurutkan dari besar ke kecil
+            dataWithCategories.sort((a, b) => b.value - a.value);
+
+            // Memisahkan kembali kategori dan data setelah pengurutan
+            const sortedCategories = dataWithCategories.map(item => item.category);
+            const sortedData = dataWithCategories.map(item => item.value);
+
+            // Membuat chart
             Highcharts.chart('container4', {
                 chart: {
                     type: 'column'
@@ -729,7 +888,7 @@
                     text: 'Akumulasi Rejection Mold'
                 },
                 xAxis: {
-                    categories: categoriesQuantity,
+                    categories: sortedCategories,
                     title: {
                         text: 'Jenis Rejection'
                     }
@@ -751,9 +910,10 @@
                 },
                 series: [{
                     name: 'Jumlah Rejection',
-                    data: akumulasiRejectionData
+                    data: sortedData
                 }]
             });
+
 
             const suppliers = [...new Set(filteredRejection.map(item => item.suplier))]; // Changed 'supplier' to 'suplier' based on your data
             const totalRejectionPerSupplierData = suppliers.map(supplier => {
@@ -795,7 +955,6 @@
         await fetchData();
     });
 </script>
-
 
 
 <?= $this->endSection() ?>
