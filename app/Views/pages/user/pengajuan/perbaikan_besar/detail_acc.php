@@ -24,8 +24,8 @@
                                                 <th>Gambar Kerusakan</th>
                                                 <th>Status</th>
                                                 <th>Rencana Perbaikan</th>
-                                                <th>Visit</th>
                                                 <th>Gambar Perbaikan</th>
+                                                <th>Visit</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -50,20 +50,22 @@
                                                             <?= $user['rencana_perbaikan'] ?>
                                                         </td>
                                                         <td>
+                                                            <?php if ($user['gambar_diperbaiki'] != null) : ?>
+                                                                <img src="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>">
+                                                               
+                                                            <?php else : ?>
+                                                                Belum upload
+                                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-right" data-id-perbaikan="<?= $user['id_perbaikan'] ?>">Upload Gambar</button>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
                                                             <?php if ($user['visit'] != 0) : ?>
                                                                 <p>sudah</p>
                                                             <?php else : ?>
                                                                 <a class="btn btn-primary verifikasi-btn" data-id="<?= $user['id_perbaikan']; ?>">Verifikasi</a>
                                                             <?php endif; ?>
                                                         </td>
-                                                        <td>
-                                                            <?php if ($user['gambar_diperbaiki'] != null) : ?>
-                                                                <?= $user['gambar_diperbaiki'] ?>
-                                                            <?php else : ?>
-                                                                Belum upload
-                                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-right" data-id-perbaikan="<?= $user['id_perbaikan'] ?>">Upload Gambar</button>
-                                                            <?php endif; ?>
-                                                        </td>
+
                                                     </tr>
                                                 <?php endif; ?>
                                             <?php endforeach; ?>

@@ -62,7 +62,7 @@ class SupplierModel extends Model
 
     public function updateJumlahProduk($id, $jumlah)
     {
-        return $this->where('id', $id)
+        return $this->where('id_mold', $id)
             ->set('jumlah_produk', $jumlah)
             ->update();
     }

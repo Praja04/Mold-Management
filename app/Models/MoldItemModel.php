@@ -75,9 +75,10 @@ class MoldItemModel extends Model
     public function getItemBySupplier($supplier2)
     {
         $suplierModel = new SupplierModel();
-        $latestYear = $suplierModel->getLatestYear();
+        //$latestYear = $suplierModel->getLatestYear();
+        $latestYear = 1;
 
-        if ($latestYear) {
+        if ($latestYear == 1) {
             // Query kedua: Mencocokkan semua mold_name di tabel mold_item dan menampilkan suplier
             $query = $this->db->query("
             SELECT mi.ITEM, mi.NO, mi.MADE_IN, mi.STATUS, mi.MATERIAL, mi.DIMENSI_MOLD, s.suplier
@@ -212,13 +213,13 @@ class MoldItemModel extends Model
     public function getItemsperbaikanBesar($supplier)
     {
         $suplierModel = new SupplierModel();
-        $latestYear = $suplierModel->getLatestYear();
+        //$latestYear = $suplierModel->getLatestYear();
 
         // Ambil data mold_name dari suplier berdasarkan supplier dan tahun terbaru
         $query = $this->db->table('suplier')
             ->select('mold_name')
             ->where('suplier', $supplier)
-            ->where('tahun', $latestYear['tahun'])
+         //   ->where('tahun', $latestYear['tahun'])
             ->get();
 
         // Ambil hasil query sebagai array

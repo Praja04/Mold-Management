@@ -129,15 +129,17 @@
             var button = $(event.relatedTarget);
             var idmold = button.data('id-mold');
             var modal = $(this);
+            console.log(idmold);
             modal.find('#id-mold').val(idmold);
         });
 
         // Simpan data dari modal
         $('#save-button').on('click', function() {
             const formData = new FormData();
+
             formData.append('id_mold', $('#id-mold').val());
             formData.append('jumlah', $('#jumlah').val());
-
+            
             $.ajax({
                 url: '<?= base_url('update/hasilproduksi') ?>',
                 type: 'POST',

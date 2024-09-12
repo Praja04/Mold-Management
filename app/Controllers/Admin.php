@@ -524,7 +524,7 @@ class Admin extends BaseController
 
             // Menyimpan data supplier ke database
             $supplierModel->insert([
-                'tahun' => date('Y'),
+                'tahun' => date('Y-m-d'), 
                 'suplier' => $this->request->getPost('supplier'),
                 'id_mold' => $newNo,
                 'mold_name' => $postData['ITEM'],

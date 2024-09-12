@@ -87,13 +87,13 @@ class TransaksiJumlahProduk extends Model
     public function getItemsreportDaily($supplier)
     {
         $suplierModel = new SupplierModel();
-        $latestYear = $suplierModel->getLatestYear();
+      //  $latestYear = $suplierModel->getLatestYear();
 
         // Ambil data mold_name dari suplier berdasarkan supplier dan tahun terbaru
         $query = $this->db->table('suplier')
         ->select('mold_name, jumlah_produk,id_mold')
         ->where('suplier', $supplier)
-            ->where('tahun', $latestYear['tahun'])
+          //  ->where('tahun', $latestYear['tahun'])
             ->get();
 
         // Ambil hasil query sebagai array

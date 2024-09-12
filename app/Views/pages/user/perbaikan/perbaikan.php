@@ -191,9 +191,7 @@
                 success: function(response) {
                     if (response.hasOwnProperty('message')) {
                         showToast(response.message);
-                        setTimeout(function() {
-                           location.reload();
-                        }, 4000);
+                        setTimeout(() => window.location.href = ('<?= base_url('pengajuan/perbaikan') ?>'), 2000);
                     } else if (response.hasOwnProperty('error')) {
                         showToast(response.error, true);
                     }
