@@ -520,57 +520,76 @@ class Admin extends BaseController
             // Menyimpan data mold ke database dengan NO baru
             $postData['NO'] = $newNo;
             $moldItem->insert($postData);
-            //  $newID = $moldItem->insertID();
 
             // Menyimpan data supplier ke database
             $supplierModel->insert([
-                'tahun' => date('Y-m-d'), 
+                'tahun' => date('Y-m-d'),
                 'suplier' => $this->request->getPost('supplier'),
                 'id_mold' => $newNo,
                 'mold_name' => $postData['ITEM'],
                 'jumlah_produk' => 0
             ]);
 
-
-            // Handle dokumen_mold2 (opsional)
+            // Handle dokumen_mold2 dan dokumen_mold3 (opsional)
             $dokumen_mold2 = $this->request->getFile('dokumen_mold2');
             $dokumen_mold3 = $this->request->getFile('dokumen_mold3');
             $Gambar_mold = $this->request->getFile('Gambar_Mold');
             $dokumen_mold = $this->request->getFile('dokumen_mold');
-            if ($dokumen_mold && $dokumen_mold->isValid() && !$dokumen_mold->hasMoved()) {
-                $dokumenmold2 = $dokumen_mold2->getRandomName();
-                $dokumen_mold2->move(ROOTPATH . 'public/uploads', $dokumenmold2);
 
-                $dokumenmold3 = $dokumen_mold3->getRandomName();
-                $dokumen_mold3->move(ROOTPATH . 'public/uploads', $dokumenmold3);
+            $dokumenmold2 = null; // Default to null
+            $dokumenmold3 = null; // Default to null
+            $gambarmold = null; // Default to null
+            $dokumenmold = null; // Default to null
 
-
-                $gambarmold = $Gambar_mold->getRandomName();
-                $Gambar_mold->move(ROOTPATH . 'public/uploads', $gambarmold);
-
-
+            // Memproses dokumen_mold1 (wajib)
+            if ($dokumen_mold && $dokumen_mold->isValid() && !$dokumen_mold->hasMoved()
+            ) {
                 $dokumenmold = $dokumen_mold->getRandomName();
                 $dokumen_mold->move(ROOTPATH . 'public/uploads', $dokumenmold);
-                $detail_mold->insert([
-                    'Part_Name' => $postData['ITEM'],
-                    'User_ID' =>  $this->request->getPost('user_id'),
-                    'Mold_Id' => $newNo,
-                    'Gambar_Mold' => $gambarmold,
-                    'dokumen_mold' => $dokumenmold,
-                    'dokumen_mold2' => $dokumenmold2,
-                    'dokumen_mold3' => $dokumenmold3
-                ]);
             } else {
                 return $this->response->setJSON(['error' => 'Dokumen Mold 1 is required and must be a valid file.']);
             }
 
+            // Memproses dokumen_mold2 (jika ada)
+            if ($dokumen_mold2 && $dokumen_mold2->isValid() && !$dokumen_mold2->hasMoved()
+            ) {
+                $dokumenmold2 = $dokumen_mold2->getRandomName();
+                $dokumen_mold2->move(ROOTPATH . 'public/uploads', $dokumenmold2);
+            }
+
+            // Memproses dokumen_mold3 (jika ada)
+            if ($dokumen_mold3 && $dokumen_mold3->isValid() && !$dokumen_mold3->hasMoved()
+            ) {
+                $dokumenmold3 = $dokumen_mold3->getRandomName();
+                $dokumen_mold3->move(ROOTPATH . 'public/uploads', $dokumenmold3);
+            }
+
+            // Memproses gambar mold (jika ada)
+            if ($Gambar_mold && $Gambar_mold->isValid() && !$Gambar_mold->hasMoved()) {
+                $gambarmold = $Gambar_mold->getRandomName();
+                $Gambar_mold->move(ROOTPATH . 'public/uploads', $gambarmold);
+            }
+
+            // Menyimpan data detail mold ke database
+            $detail_mold->insert([
+                'Part_Name' => $postData['ITEM'],
+                'User_ID' =>  $this->request->getPost('user_id'),
+                'Mold_Id' => $newNo,
+                'Gambar_Mold' => $gambarmold,
+                'dokumen_mold' => $dokumenmold,
+                'dokumen_mold2' => $dokumenmold2,
+                'dokumen_mold3' => $dokumenmold3
+            ]);
 
             return $this->response->setJSON(['message' => 'Data updated successfully!']);
         } catch (\Exception $e) {
-            log_message('error', 'Update error: ' . $e->getMessage());
+            log_message('error',
+                'Update error: ' . $e->getMessage()
+            );
             return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
     }
+
 
     public function all_product_mold()
     {

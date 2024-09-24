@@ -46,6 +46,10 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
+                                        <label class="form-label">Gambar Mold :</label>
+                                        <input type="file" class="form-control" required name="Gambar_Mold" id="Gambar_Mold">
+                                    </div>
+                                    <div class="form-group">
                                         <label class="form-label">Made In</label>
                                         <div class="input-group mb-3">
                                             <input type="text" id="MADE_IN" name="MADE_IN" class="form-control" required placeholder="Made In" />
@@ -55,7 +59,11 @@
                                     <div class="form-group">
                                         <label class="form-label">Status</label>
                                         <div class="input-group mb-3">
-                                            <input type="text" id="STATUS" name="STATUS" class="form-control" required placeholder="Status" />
+                                            <select id="STATUS" name="STATUS" class="form-select" required>
+                                                <option value="ACTIVE">Active</option>
+                                                <option value="INACTIVE">In Active</option>
+                                                <option value="NEW / INACTIVE">NEW / In Active</option>
+                                            </select>
                                             <span class="input-group-text"><i class="ti-reload"></i></span> <!-- Ikon diubah -->
                                         </div>
                                     </div>
@@ -149,20 +157,16 @@
                                     </h4>
                                     <hr class="my-15" />
                                     <div class="form-group">
-                                        <label class="form-label">Gambar Mold :</label>
-                                        <input type="file" class="form-control" required name="Gambar_Mold" id="Gambar_Mold">
-                                    </div>
-                                    <div class="form-group">
                                         <label class="form-label">Dokumen Mold 1 :</label>
                                         <input type="file" class="form-control" required name="dokumen_mold" id="dokumen_mold">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Dokumen Mold 2 :</label>
-                                        <input type="file" class="form-control" required name="dokumen_mold2" id="dokumen_mold2">
+                                        <input type="file" class="form-control" name="dokumen_mold2" id="dokumen_mold2">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Dokumen Mold 3 :</label>
-                                        <input type="file" class="form-control" required name="dokumen_mold3" id="dokumen_mold3">
+                                        <input type="file" class="form-control" name="dokumen_mold3" id="dokumen_mold3">
                                     </div>
                                 </div>
                                 <!-- /.box-body -->
@@ -295,8 +299,9 @@
             formData.append('supplier', $('#supplier').val());
             formData.append('Gambar_Mold', $('#Gambar_Mold')[0].files[0]);
             formData.append('dokumen_mold', $('#dokumen_mold')[0].files[0]);
-            formData.append('dokumen_mold2', $('#dokumen_mold2')[0].files[0]);
-            formData.append('dokumen_mold3', $('#dokumen_mold3')[0].files[0]);
+            // Menambahkan dokumen_mold2 dan dokumen_mold3
+            formData.append('dokumen_mold2', $('#dokumen_mold2')[0].files[0] || null);
+            formData.append('dokumen_mold3', $('#dokumen_mold3')[0].files[0] || null);
             $.ajax({
                 url: "<?= base_url('register/action/mold') ?>", // URL untuk proses form
                 type: "POST", // Metode pengiriman

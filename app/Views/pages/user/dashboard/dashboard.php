@@ -68,7 +68,6 @@
             </div>
           </div>
         </div>
-
         <div class="col-xl-12 col-lg-6 col-12">
           <div class="box">
             <div class="box-header with-border">
@@ -90,10 +89,12 @@
                     <tr>
                       <th>No</th>
                       <th>Nama Mold</th>
+                      <th>Status</th>
                       <th>Action</th>
-                      <th>Jumlah Produksi</th>
+                      <th>Jumlah Produksi Total</th>
                       <!-- <th>Jumlah Dikirim</th> -->
-                      <th>Report Harian</th>
+                      <!-- <th>Report Harian</th> -->
+                      <th>Jumlah Report Produksi Hari Ini</th>
                       <th>Perbaikan Besar</th>
                     </tr>
                   </thead>
@@ -103,9 +104,15 @@
                       <tr>
                         <td><?= $i++; ?></td>
                         <td><?= $items['ITEM'] ?></td>
+                        <td><?= $items['STATUS'] ?></td>
                         <td>
-                          <button class="daily-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="<?= $items['ITEM'] ?>" data-id="<?= $items['NO'] ?>">Report Harian</button>
-                          <button class="perbaikan-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="<?= $items['ITEM'] ?>" data-id="<?= $items['NO'] ?>">Perbaikan Besar</button>
+                          <?php if ($items['STATUS'] === 'ACTIVE') : ?>
+                            <button class="daily-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="<?= $items['ITEM'] ?>" data-id="<?= $items['NO'] ?>">Report Harian</button>
+                            <button class="perbaikan-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" data-item="<?= $items['ITEM'] ?>" data-id="<?= $items['NO'] ?>">Perbaikan Besar</button>
+                          <?php else : ?>
+                            <button class="daily-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" disabled>Report Harian</button>
+                            <button class="perbaikan-button aksi-button btn btn-primary text-white me-0" style="margin:5px;" disabled>Perbaikan Besar</button>
+                          <?php endif; ?>
                         </td>
                         <td>
                           <?= number_format($items['jumlah_produk'], 0, ',', '.') ?>
@@ -114,9 +121,9 @@
                           <?= number_format($items['total_jumlah_produk'], 0, ',', '.') ?>
                         </td> -->
 
-                        <td><a class="btn btn-secondary" href="<?= base_url('history/report') ?>?namaMold=<?= urlencode($items['ITEM']) ?>"><span class="ti ti-eye"></a></td>
+                        <!-- <td><a class="btn btn-secondary" href="<?= base_url('history/report') ?>?namaMold=<?= urlencode($items['ITEM']) ?>"><span class="ti ti-eye"></a></td> -->
+                        <td> <?= number_format($items['exists_today_report'], 0, ',', '.') ?></td>
                         <td><a class="btn btn-info" href="<?= base_url('history/perbaikan') ?>?namaMold=<?= urlencode($items['ITEM']) ?>"><span class="ti ti-eye"></a></td>
-
                       </tr>
                     <?php endforeach ?>
                   </tbody>

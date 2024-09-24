@@ -36,7 +36,7 @@ class SupplierModel extends Model
     {
         // Load the TransaksiJumlahProduk model
         $transaksiModel = new TransaksiJumlahProduk();
-
+        $reportModel = new ReportModel();
         // Query to fetch supplier data with matching mold_item data
         $query = $this->db->query("
             SELECT s.*, mi.*
@@ -50,6 +50,8 @@ class SupplierModel extends Model
         // Loop through the results to add total 'jumlah_produk' for each 'mold_name'
         foreach ($results as &$result) {
             $result['total_jumlah_produk'] = $transaksiModel->getTotalJumlahProdukByMold($result['mold_name']);
+            $result['exists_today_report'] = $reportModel->existsTodayReport($result['mold_name']); // Cek report hari ini
+
         }
 
         return $results;

@@ -40,6 +40,22 @@ class ReportModel extends Model
         'problem_harian',
         'created_at'
     ];
+
+    public function existsTodayReport($namaMold)
+    {
+        $today = date('Y-m-d'); // Ambil tanggal hari ini
+        $query = $this->db->query("
+        SELECT COALESCE(SUM(jumlah_ok), 0) as total_jumlah_ok
+        FROM report_daily
+        WHERE nama_mold = ? AND CONVERT(date, tanggal_pengajuan) = ?
+    ", [$namaMold, $today]);
+
+        $result = $query->getRow();
+        return $result ? (int) $result->total_jumlah_ok : 0; // Kembalikan jumlah_ok hari ini atau 0 jika tidak ada
+    }
+
+
+
     public function getUserCategoryTotals()
     {
         // Get the current month and year

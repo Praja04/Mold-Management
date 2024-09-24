@@ -82,7 +82,7 @@
                                     <h4 class="box-title text-info mb-0 mt-20"><i class="ti-save me-15"></i>Hasil Produksi </h4>
                                     <hr class="my-15">
                                     <div class="form-group">
-                                        <label class="form-label">Jumlah OK Produk</label>
+                                        <label class="form-label">Jumlah Shot Mold (OK)</label>
                                         <input id="jumlah_ok" type="number" class="form-control jumlah_ok" name="jumlah_ok[]" required>
                                     </div>
                                     <br><br>
