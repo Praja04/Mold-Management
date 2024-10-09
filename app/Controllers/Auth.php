@@ -89,11 +89,18 @@ class Auth extends BaseController
             $data = json_decode($body, true);
 
             if (!empty($data)) {
+                $npk_admin = [3651,3650];
+
+                if (in_array($data['npk'], $npk_admin)) {
+                    $role = 'admin';
+                } else {
+                    $role = 'reader';
+                }
                 $session_data = [
                     'username' => $data['username'],
                     'admin_nama' => $data['nama'],
                     'admin_id' => $data['npk'],
-                    'role' => 'admin',
+                    'role' => $role,
                     'id_divisi' => $data['id_divisi'],
                     'divisi' => $data['divisi'],
                     'id_departement' => $data['id_departement'],
@@ -148,7 +155,7 @@ class Auth extends BaseController
 
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
-        $role = $this->request->getPost('role');
+        $role = 'user';
         $suplier = $this->request->getPost('suplier');
         $address = $this->request->getPost('address');
 

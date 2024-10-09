@@ -201,8 +201,8 @@ class ReportDaily extends BaseController
         }
         $supplierId = $this->request->getGet('supplier');
         if ($supplierId) {
-            
-            $data['data'] =$this->transaksiProduk->getItemsreportDaily($supplierId);
+
+            $data['data'] = $this->transaksiProduk->getItemsreportDaily($supplierId);
         }
 
         return view('pages/admin/perbaikan_daily/list_mold', $data);
@@ -216,9 +216,7 @@ class ReportDaily extends BaseController
         }
         $nama_mold = $this->request->getGet('namaMold');
 
-        $moldData['historymoldData'] = $this->reportPerbaikan->where('nama_mold', $nama_mold)
-            ->orderBy('created_at', 'DESC')
-            ->findAll();
+        $moldData['historymoldData'] = $this->reportPerbaikan->getMoldDataWithSupplier($nama_mold);
         return view('pages/admin/perbaikan_daily/perbaikan_detail', $moldData);
     }
 
@@ -234,7 +232,7 @@ class ReportDaily extends BaseController
             ->where('is_seen', 'no')
             ->orderBy('created_at', 'DESC')
             ->findAll();
-        
+
         return view('pages/admin/perbaikan_daily/pengiriman_no_seen', $moldData);
     }
 
@@ -264,8 +262,7 @@ class ReportDaily extends BaseController
             'is_seen' => $is_seen
         ];
 
-        if
-        ($this->transaksiProduk->update($id, $data)) {
+        if ($this->transaksiProduk->update($id, $data)) {
             return $this->response->setJSON(['success' => true]);
         } else {
             return $this->response->setJSON(['success' => false]);
@@ -282,7 +279,7 @@ class ReportDaily extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'No valid IDs provided']);
         }
 
-       
+
         // Pastikan IDs adalah array dari integer
         $ids = array_map('intval', $ids);
 
@@ -315,18 +312,23 @@ class ReportDaily extends BaseController
 
     public function getrejectionBySuplier()
     {
-        $data['reject']= $this->reportPerbaikan->getUserCategoryTotals();
+        $data['reject'] = $this->reportPerbaikan->getUserCategoryTotals();
         return $this->response->setJSON($data);
     }
 
     public function update_report($id)
     {
-        if (session()->get('user_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        // if (session()->get('user_nama') == '') {
+        //     session()->setFlashdata('gagal', 'Anda belum login');
+        //     return redirect()->to(base_url('/'));
+        // }
+        $allowed_roles = ['admin'];
+        $user_role = session()->get('role');
+        if (!in_array($user_role, $allowed_roles)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Tidak memiliki akses untuk mengubah ']);
         }
 
-        $userID = session()->get('user_id');
+        // $userID = session()->get('user_id');
 
         try {
             // Ambil data lama dari report_perbaikan
@@ -366,12 +368,12 @@ class ReportDaily extends BaseController
 
             // Update data di report_perbaikan
             $data = [
-                'user_id' => $userID,
+                // 'user_id' => $userID,
                 'id_mold' => $this->request->getPost('moldId'),
                 'nama_mold' => $nama_mold,
                 'jumlah_ok' => $jumlah_ok,
-                'material' => $this->request->getPost('material'),
-                'tanggal_pengajuan' => $this->request->getPost('tanggal_report'),
+                //'material' => $this->request->getPost('material'),
+                //'tanggal_pengajuan' => $this->request->getPost('tanggal_report'),
                 'problem_harian' => $this->request->getPost('problem_harian'),
                 'setup_mesin' => $setup_mesin,
                 'cuci_barel' => $cuci_barel,
@@ -412,12 +414,12 @@ class ReportDaily extends BaseController
     }
     public function delete_report($id)
     {
-        if (session()->get('user_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
-        }
+        // if (session()->get('user_nama') == '') {
+        //     session()->setFlashdata('gagal', 'Anda belum login');
+        //     return redirect()->to(base_url('/'));
+        // }
 
-        $userID = session()->get('user_id');
+        // $userID = session()->get('user_id');
 
         try {
             // Ambil data lama dari report_perbaikan
@@ -432,7 +434,7 @@ class ReportDaily extends BaseController
             $mold = $this->moldTotalProduk->where('mold_name', $nama_mold)->first();
 
             if ($mold) {
-                $newTotal = $mold['jumlah_produk'] - $oldReport['jumlah_ok'] ;
+                $newTotal = $mold['jumlah_produk'] - $oldReport['jumlah_ok'];
                 $this->moldTotalProduk->update($mold['id'], ['jumlah_produk' => $newTotal]);
             }
 

@@ -4,11 +4,15 @@ namespace App\Controllers;
 
 use App\Models\ReportModel;
 use App\Models\UserModel;
+use App\Models\AdminModel;
 use App\Models\MoldItemModel;
 use App\Models\DetailMold;
 use App\Models\PerbaikanBesarModel;
 use App\Models\TransaksiJumlahProduk;
 use App\Models\SupplierModel;
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Admin extends BaseController
 {
@@ -24,10 +28,13 @@ class Admin extends BaseController
         session()->setFlashdata('gagal', 'Anda belum login');
         return redirect()->to(base_url('/'));
     }
+
     public function updateProdukById()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        $allowed_roles = ['admin'];
+        $user_role = session()->get('role');
+        if (!in_array($user_role, $allowed_roles)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Tidak memiliki akses untuk mengubah ']);
         }
         $model = new SupplierModel();
         $id = $this->request->getPost('id_mold');
@@ -542,7 +549,8 @@ class Admin extends BaseController
             $dokumenmold = null; // Default to null
 
             // Memproses dokumen_mold1 (wajib)
-            if ($dokumen_mold && $dokumen_mold->isValid() && !$dokumen_mold->hasMoved()
+            if (
+                $dokumen_mold && $dokumen_mold->isValid() && !$dokumen_mold->hasMoved()
             ) {
                 $dokumenmold = $dokumen_mold->getRandomName();
                 $dokumen_mold->move(ROOTPATH . 'public/uploads', $dokumenmold);
@@ -551,14 +559,16 @@ class Admin extends BaseController
             }
 
             // Memproses dokumen_mold2 (jika ada)
-            if ($dokumen_mold2 && $dokumen_mold2->isValid() && !$dokumen_mold2->hasMoved()
+            if (
+                $dokumen_mold2 && $dokumen_mold2->isValid() && !$dokumen_mold2->hasMoved()
             ) {
                 $dokumenmold2 = $dokumen_mold2->getRandomName();
                 $dokumen_mold2->move(ROOTPATH . 'public/uploads', $dokumenmold2);
             }
 
             // Memproses dokumen_mold3 (jika ada)
-            if ($dokumen_mold3 && $dokumen_mold3->isValid() && !$dokumen_mold3->hasMoved()
+            if (
+                $dokumen_mold3 && $dokumen_mold3->isValid() && !$dokumen_mold3->hasMoved()
             ) {
                 $dokumenmold3 = $dokumen_mold3->getRandomName();
                 $dokumen_mold3->move(ROOTPATH . 'public/uploads', $dokumenmold3);
@@ -583,7 +593,8 @@ class Admin extends BaseController
 
             return $this->response->setJSON(['message' => 'Data updated successfully!']);
         } catch (\Exception $e) {
-            log_message('error',
+            log_message(
+                'error',
                 'Update error: ' . $e->getMessage()
             );
             return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
@@ -946,24 +957,43 @@ class Admin extends BaseController
 
         return view('pages/admin/dashboard/detail_suplier', $data);
     }
+
     public function updateAddressSupplier()
     {
         if (!session()->has('admin_nama')) {
             return $this->redirectLogin();
         }
-        $userModel = new UserModel();
-        $address = $this->request->getPost('address');
-        $supplier = $this->request->getPost('supplier');
-        $username = $this->request->getPost('username'); // Pastikan username dikirim dari form
-        // Update password di database berdasarkan username
-        $userModel->where('username', $username)
-            ->set('suplier', $supplier)
-            ->set('address', $address)
-            ->update();
+        try {
+            // Load models
+            $userModel = new UserModel();
+            $suplierModel = new SupplierModel();
+            $perbaikanBesarModel = new PerbaikanBesarModel();
 
-        // Kembalikan notifikasi sukses
-        return redirect()->to(base_url("detail/suplier?supplier=" . urlencode((string)$supplier)))
-        ->with('success', 'Data updated successfully.');
+            // Get the POST data
+            $address = $this->request->getPost('address');
+            $supplier = $this->request->getPost('supplier');
+            $username = $this->request->getPost('username');
+            $supplier_existing = $this->request->getPost('supplier_existing');
+            $email = $this->request->getPost('email');
+
+
+            $suplierModel->where('suplier', $supplier_existing)
+                ->set('suplier', $supplier)
+                ->update();
+
+            $userModel->where('username', $username)
+                ->set(['suplier' => $supplier, 'address' => $address,'email' => $email])
+                ->update();
+            $perbaikanBesarModel->where('suplier', $supplier_existing)
+                ->set('suplier', $supplier)->update();
+
+            // Return success response
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            // Log error and return error response
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
     }
 
     public function deleteAccount()
@@ -984,34 +1014,159 @@ class Admin extends BaseController
         if (!session()->has('admin_nama')) {
             return $this->redirectLogin();
         }
-        // Mendapatkan data dari form
-        $username = $this->request->getPost('username');
-        $suplier = $this->request->getPost('suplier');
-        $newPassword = $this->request->getPost('new_password');
-        $confirmPassword = $this->request->getPost('confirm_password');
+        try {
+            // Mendapatkan data dari form
+            $username = $this->request->getPost('username');
+            $suplier = $this->request->getPost('suplier');
+            $newPassword = $this->request->getPost('new_password');
+            $confirmPassword = $this->request->getPost('confirm_password');
 
-        // Validasi jika password baru dan konfirmasi password cocok
-        if (
-            $newPassword !== $confirmPassword
-        ) {
-            // Password tidak sama, kembalikan error
-            return redirect()->back()->with('error', 'New password and confirmation do not match.');
+            // Validasi jika password baru dan konfirmasi password cocok
+            if (
+                $newPassword !== $confirmPassword
+            ) {
+                // Password tidak sama, kembalikan error
+                // return redirect()->back()->with('error', 'New password and confirmation do not match.');
+                return $this->response->setJSON(['error' => 'Password baru dan password konfirmasi tidak sama!']);
+            }
+            // Hash password baru
+            $hashedPassword = password_hash((string)$newPassword, PASSWORD_DEFAULT);
+
+            // Load model user
+            $userModel = new UserModel();
+
+            // Update password di database berdasarkan username
+            $userModel->where('username', $username)
+                ->set('password', $hashedPassword)
+                ->update();
+
+            // Kembalikan notifikasi sukses
+            // return redirect()->to(base_url("detail/suplier?supplier=" . urlencode((string)$suplier)))
+            //     ->with('success', 'Password updated successfully.');
+            return $this->response->setJSON(['message' => 'Password updated successfully!']);
+        } catch (\Exception $e) {
+            // Log error and return error response
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    public function settings_admin()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        $session_data = [
+            'admin_nama' => session()->get('admin_nama'),
+            'admin_id' => session()->get('admin_id'),
+            'role' => session()->get('role'),
+            'id_divisi' => session()->get('id_divisi'),
+            'divisi' => session()->get('divisi'),
+            'id_departement' => session()->get('id_departement'),
+            'departement' => session()->get('departement'),
+            'id_section' => session()->get('id_section'),
+            'section' => session()->get('section'),
+            'id_sub_section' => session()->get('id_sub_section'),
+            'sub_section' => session()->get('sub_section'),
+            'kode_jabatan' => session()->get('kode_jabatan'),
+        ];
+        $admin = new AdminModel();
+        $data['admin'] = $admin->findAll();
+        $data = array_merge($data, $session_data);
+        return view('pages/admin/dashboard/admin_setting', $data);
+    }
+    
+    public function add_admin()
+    {
+        if (!session()->has('admin_nama')) {
+            return $this->redirectLogin();
+        }
+        try {
+            // Load models
+            $adminModel = new AdminModel();
+            $data = [
+                'name' => $this->request->getPost('nama'),
+                'email' => $this->request->getPost('email'),
+                'role' => $this->request->getPost('role'),
+            ];
+            $adminModel->save($data);
+            // Return success response
+            return $this->response->setJSON(['message' => 'Data updated successfully!']);
+        } catch (\Exception $e) {
+            // Log error and return error response
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+
+    //export excel
+    public function exportExcel($nama_mold)
+    {
+        $tahun = $this->request->getGet('tahun');
+        $supplierModel = new SupplierModel();
+        $reportModel = new ReportModel();
+
+        $supplier = $supplierModel->where('mold_name', $nama_mold)->first();
+        if (!$supplier) {
+            return 'Mold not found';
         }
 
-        // Hash password baru
-        $hashedPassword = password_hash((string)$newPassword, PASSWORD_DEFAULT);
+        $totalProduction = $supplier['jumlah_produk'];
+        $nama_supplier = $supplier['suplier'];
 
-        // Load model user
-        $userModel = new UserModel();
+        // Ambil data berdasarkan mold dan tahun yang dipilih
+        $reports = $reportModel
+            ->where('nama_mold', $nama_mold)
+            ->where("YEAR(created_at) = $tahun") // Filter berdasarkan tahun
+            ->findAll();
 
-        // Update password di database berdasarkan username
-        $userModel->where('username', $username)
-            ->set('password', $hashedPassword)
-            ->update();
+        // Initialize monthly data for shots
+        $monthlyData = array_fill(1, 12, 0);
+        foreach ($reports as $report) {
+            $month = date('n', strtotime($report['created_at']));
+            $monthlyData[$month] += $report['jumlah_ok'];
+        }
 
-        // Kembalikan notifikasi sukses
-        return redirect()->to(base_url("detail/suplier?supplier=" . urlencode((string)$suplier)))
-        ->with('success', 'Password updated successfully.');
-      
+        // Load the template
+        $templatePath = FCPATH . 'template_excel/template.xlsx'; // Update with the correct path to your template
+        $spreadsheet = IOFactory::load($templatePath);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Write mold name, supplier, and total production to the template
+        $sheet->setCellValue('H2', $nama_mold);
+        $sheet->setCellValue('H3', $nama_supplier);
+        $sheet->setCellValue('E33', $totalProduction);
+
+        $rowMapping = [
+            1 => 9,  // January
+            2 => 11, // February
+            3 => 13, // March
+            4 => 15, // April
+            5 => 17, // May
+            6 => 19, // June
+            7 => 21, // July
+            8 => 23, // August
+            9 => 25, // September
+            10 => 27, // October
+            11 => 29, // November
+            12 => 31 // December
+        ];
+
+        foreach ($monthlyData as $month => $jumlah_ok) {
+            // Place the jumlah short per bulan in column F
+            $sheet->setCellValue('F' . $rowMapping[$month], $jumlah_ok);
+        }
+
+        // Set headers to prompt download in the browser
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Data_Short_Mold_' . $nama_mold . '_' . $tahun . '.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        // Save file to output stream
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
+
+
 }

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\AdminModel;
 use App\Models\PerbaikanBesarModel;
 use App\Models\short_akumulasiModel;
 use App\Models\MoldItemModel;
@@ -10,7 +11,7 @@ use App\Models\SupplierModel;
 
 class PerbaikanBesar extends BaseController
 {
-    
+
     public function showAccumulatePerbaikan()
     {
         $model = new SupplierModel();
@@ -42,9 +43,13 @@ class PerbaikanBesar extends BaseController
         }
         try {
             $perbaikan = new PerbaikanBesarModel();
+            $admin = new AdminModel();
             $userID = session()->get('user_id');
             $gambar_rusak = $this->request->getFile('gambar_rusak');
-
+            $nama_mold = $this->request->getPost('part_name');
+            $kondisi_mold = $this->request->getPost('kondisi_perbaikan');
+            $suplier = $this->request->getPost('suplier');
+            $keterangan = $this->request->getPost('keterangan') ?? 0;
             // Check if the file is valid and has been uploaded
             if (!$gambar_rusak->isValid()) {
                 throw new \RuntimeException($gambar_rusak->getErrorString() . '(' . $gambar_rusak->getError() . ')');
@@ -56,15 +61,61 @@ class PerbaikanBesar extends BaseController
             $data = [
                 'user_id' => $userID,
                 'id_mold' => $this->request->getPost('moldId'),
-                'nama_mold' => $this->request->getPost('part_name'),
-                'suplier' => $this->request->getPost('suplier'),
+                'nama_mold' => $nama_mold,
+                'suplier' => $suplier,
                 'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
-                'kondisi_mold' => $this->request->getPost('kondisi_perbaikan'),
-                'keterangan' => $this->request->getPost('keterangan') ?? 0,
+                'kondisi_mold' => $kondisi_mold,
+                'keterangan' => $keterangan,
                 'gambar_rusak' => $gambar_rusak_name
             ];
 
             $perbaikan->save($data);
+
+            // Data untuk email
+            $penerima = $admin->select('name, email')->findAll();
+            $gambar_mold_rusak = 'https://portal3.incoe.astra.co.id/pce-mold-management/public/uploads/'. $gambar_rusak_name;
+            // URL API untuk mengirim email
+            $api_url = "https://portal2.incoe.astra.co.id/vendor_rating_infor/api/send_email_text";
+
+            foreach ($penerima as $person) {
+                $email_to = $person['email'];  // Mengambil email tiap admin
+                $nama_person = $person['name'];  // Mengambil nama tiap admin
+
+                // Subjek dan pesan email
+                $email_subject = "Problem Mold CBI";
+                $email_message = "Halo " . $nama_person . ",\n\n" .
+                    "Kami menginformasikan bahwa ada kerusakan pada mold  " .  $nama_mold . ".\n" .
+                    "suplier : " . $suplier . ".\n\n" .
+                    "kondisi kerusakan mold : " . $kondisi_mold . ".\n\n" .
+                    "keterangan kerusakan mold : " . $keterangan . ".\n\n" .
+                    "gambar kerusakan mold : " .  $gambar_mold_rusak . ".\n\n" .
+                    "Cek keadaan mold pada link berikut https://portal3.incoe.astra.co.id/pce-mold-management/public/report/perbaikan/besar\n" .
+                    "Terima kasih,\n" . 
+                    "from PCE";
+
+                // Data yang akan dikirim ke API
+                $post_data = [
+                    'to' => $email_to,
+                    'cc' => '', // Kosongkan CC
+                    'subject' => $email_subject,
+                    'message' => $email_message
+                ];
+
+                // Melakukan POST request ke API untuk setiap admin
+                $ch = curl_init($api_url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+
+                $response = curl_exec($ch);
+                $error = curl_error($ch);
+                curl_close($ch);
+
+                // Cek apakah ada error dalam pengiriman email
+                if ($error) {
+                    return $this->response->setJSON(['error' => 'Gagal mengirim email ke ' . $email_to . ': ' . $error]);
+                }
+            }
             return $this->response->setJSON(['message' => 'Data submitted successfully!']);
         } catch (\Exception $e) {
             log_message('error', 'Error in submit_perbaikan: ' . $e->getMessage());
@@ -149,7 +200,7 @@ class PerbaikanBesar extends BaseController
             session()->setFlashdata('gagal', 'Anda belum login');
             return redirect()->to(base_url('/'));
         }
-        $user_id = session()->get('user_id'); 
+        $user_id = session()->get('user_id');
         $model = new PerbaikanBesarModel();
         $data = $model->getAllLogbook($user_id);
         return $this->response->setJSON($data);
@@ -186,26 +237,60 @@ class PerbaikanBesar extends BaseController
 
         try {
             $perbaikanBesarModel = new PerbaikanBesarModel();
+            $UserModel = new UserModel();
+
             $id_perbaikan = $this->request->getPost('id_perbaikan');
+            $id_suplier = $this->request->getPost('user_id');
+            $nama_mold = $this->request->getPost('nama_mold');
             $rencana_perbaikan = $this->request->getPost('rencana_perbaikan');
 
             $data = [
                 'rencana_perbaikan' => $rencana_perbaikan,
-                'terima_perbaikan'=> 'yes'
+                'terima_perbaikan' => 'yes'
             ];
 
             $perbaikanBesarModel->update($id_perbaikan, $data);
 
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Data sudah diperbarui.'
-            ]);
-           
+            $Emailsuplier = $UserModel->select('email')->where('id', $id_suplier)->first();
+
+            if (is_null($Emailsuplier)) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Data sudah diperbarui namun notifikasi email tidak dikirim karena user belum mendaftarkan email.'
+                ]);
+            } else {
+                $email_to = $Emailsuplier['email'];
+                $email_subject = "Perbaikan Besar Mold " . $nama_mold;
+                $email_message = "Halo,\n\nRencana perbaikan untuk mold " . $nama_mold . " telah diperbarui.\n\nRencana: " . $rencana_perbaikan;
+
+                $api_url = "https://portal2.incoe.astra.co.id/vendor_rating_infor/api/send_email_text";
+                $post_data = [
+                    'to' => $email_to,
+                    'cc' => '',
+                    'subject' => $email_subject,
+                    'message' => $email_message
+                ];
+
+                $ch = curl_init($api_url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+
+                $response = curl_exec($ch);
+                $error = curl_error($ch);
+                curl_close($ch);
+
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Data sudah diperbarui dan email telah dikirim.'
+                ]);
+            }
         } catch (\Exception $e) {
             log_message('error', 'File upload error: ' . $e->getMessage());
             return $this->response->setStatusCode(500)->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
     }
+
 
     public function verifikasi_perbaikan_user()
     {
