@@ -41,6 +41,15 @@ class ReportModel extends Model
         'created_at'
     ];
 
+    public function getMoldDataWithSupplier($nama_mold)
+    {
+        return $this->select('report_daily.*, users.suplier')
+        ->join('users', 'users.id = report_daily.user_id')
+        ->where('report_daily.nama_mold', $nama_mold)
+            ->orderBy('report_daily.created_at', 'DESC')
+            ->findAll();
+    }
+
     public function existsTodayReport($namaMold)
     {
         $today = date('Y-m-d'); // Ambil tanggal hari ini

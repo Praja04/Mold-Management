@@ -8,7 +8,7 @@ class UserModel extends Model
 {
     protected $table = 'users';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['username', 'password', 'role', 'suplier', 'address'];
+    protected $allowedFields = ['username', 'password', 'role', 'suplier', 'address','email'];
 
     public function cek_login($username, $password)
     {
@@ -87,7 +87,7 @@ class UserModel extends Model
 
     public function getUserByUsername($username)
     {
-        return $this->select('username , role , suplier , address')
+        return $this->select('username , role , suplier , address ,email')
         ->where('suplier', $username)
             ->first();
     }
