@@ -21,6 +21,7 @@
 	<link rel="stylesheet" href="<?= base_url() ?>assets/template/main/css/vendors_css.css">
 	<link rel="stylesheet" href="<?= base_url() ?>assets/js/slick.css">
 	<link rel="stylesheet" href="<?= base_url() ?>assets/js/slick-theme.css">
+	<link rel="stylesheet" href="<?= base_url() ?>assets/vendor_components/sweetalert/sweetalert2.min.css">
 
 	<!-- Style-->
 	<link rel="stylesheet" href="<?= base_url() ?>assets/template/main/css/style.css">
@@ -78,6 +79,27 @@
 			z-index: 1050;
 			/* Ensure it's above other elements */
 			width: fit-content;
+		}
+
+		#loading {
+			position: fixed;
+			/* Menempel di layar */
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(255, 255, 255, 0.8);
+			/* Warna semi-transparan */
+			z-index: 9999;
+			/* Pastikan elemen ini berada di atas semua konten */
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#loading img {
+			width: 100px;
+			/* Ukuran spinner */
 		}
 	</style>
 

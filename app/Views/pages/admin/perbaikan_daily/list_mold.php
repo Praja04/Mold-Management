@@ -34,7 +34,9 @@
                                                 <tr class="">
                                                     <td><?= $i++; ?></td>
                                                     <td><?= $user['ITEM']; ?></td>
-                                                    <td><?= $user['Total_Produk'] ?></td>
+                                                    <td>
+                                                        <?= number_format($user['Total_Produk'], 0, ',', '.') ?>
+                                                    </td>
                                                     <!-- <td>
                                                         <a href=" <?= base_url('daily/detail/no') ?>?namaMold=<?= urlencode($user['ITEM']) ?>" class="btn btn-<?= $user['Hasil_Verifikasi_Count_No'] > 0 ? 'danger' : 'primary' ?> text-white me-0">
                                                             <?= $user['Hasil_Verifikasi_Count_No']; ?>
@@ -139,7 +141,7 @@
 
             formData.append('id_mold', $('#id-mold').val());
             formData.append('jumlah', $('#jumlah').val());
-            
+
             $.ajax({
                 url: '<?= base_url('update/hasilproduksi') ?>',
                 type: 'POST',

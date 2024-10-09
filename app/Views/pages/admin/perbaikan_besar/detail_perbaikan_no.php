@@ -40,11 +40,19 @@
                                                     <td><?= $user['tanggal_pengajuan']; ?></td>
                                                     <td><?= $user['kondisi_mold']; ?></td>
                                                     <td>
-                                                        <img src="<?= base_url('uploads/' . $user['gambar_rusak']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_rusak']) ?>">
-
+                                                        <?php if (pathinfo($user['gambar_rusak'], PATHINFO_EXTENSION) === 'pdf') : ?>
+                                                            <!-- Tampilkan tombol untuk membuka PDF dalam modal -->
+                                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pdfModal" data-pdf="<?= base_url('uploads/' . $user['gambar_rusak']) ?>">
+                                                                Lihat PDF
+                                                            </button>
+                                                        <?php else : ?>
+                                                            <!-- Jika file adalah gambar, tampilkan gambar -->
+                                                            <img src="<?= base_url('uploads/' . $user['gambar_rusak']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_rusak']) ?>">
+                                                        <?php endif; ?>
                                                     </td>
+
                                                     <td>
-                                                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-right" data-id-perbaikan="<?= $user['id_perbaikan'] ?>">
+                                                        <button class="btn btn-danger" data-bs-toggle="modal" data-user-id="<?= $user['user_id'] ?>" data-nama-mold="<?= $user['nama_mold'] ?>" data-bs-target="#modal-right" data-id-perbaikan="<?= $user['id_perbaikan'] ?>">
                                                             <p>Belum Approved</p>
                                                         </button>
                                                     </td>
@@ -73,6 +81,8 @@
                         <div class="modal-body">
                             <form id="upload-form">
                                 <input type="hidden" id="id-perbaikan" name="id_perbaikan">
+                                <input type="hidden" id="nama_mold" name="nama_mold">
+                                <input type="hidden" id="user_id" name="user_id">
                                 <div class="form-group">
                                     <label class="form-label">Rencana Perbaikan:</label>
                                     <textarea class="form-control" rows="4" name="rencana_perbaikan" id="rencana_perbaikan" required placeholder="Isi rencana untuk datang ke suplier"></textarea>
@@ -119,6 +129,21 @@
                 </div>
             </div>
 
+            <!-- Modal untuk PDF -->
+            <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pdfModalLabel">PDF Kerusakan</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <iframe id="modalPdf" src="" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
         </section>
         <!-- /.content -->
@@ -141,6 +166,12 @@
             var modal = $(this);
             modal.find('#modalImage').attr('src', imageUrl);
         });
+        $('#pdfModal').on('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var pdfSrc = button.getAttribute('data-pdf');
+            var modalPdf = document.getElementById('modalPdf');
+            modalPdf.src = pdfSrc;
+        });
     });
 </script>
 
@@ -150,15 +181,21 @@
         $('#modal-right').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget);
             var idPerbaikan = button.data('id-perbaikan');
+            var namaMold = button.data('nama-mold');
+            var userId = button.data('user-id');
             var modal = $(this);
             modal.find('#id-perbaikan').val(idPerbaikan);
+            modal.find('#nama_mold').val(namaMold);
+            modal.find('#user_id').val(userId);
         });
 
         // Simpan data dari modal
         $('#save-button').on('click', function() {
             const formData = new FormData();
             formData.append('id_perbaikan', $('#id-perbaikan').val());
+            formData.append('nama_mold', $('#nama_mold').val());
             formData.append('rencana_perbaikan', $('#rencana_perbaikan').val());
+            formData.append('user_id', $('#user_id').val());
 
             $.ajax({
                 url: '<?= base_url('approved_perbaikan') ?>',
@@ -168,9 +205,11 @@
                 contentType: false,
                 success: function(response) {
                     if (response.success) {
-                        showModal('Success', response.message);
+                        showModal(response.message, function() {
+                            location.reload();
+                        });
                     } else {
-                        showModal('Failed', response.message);
+                        showModal(response.message);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -181,13 +220,8 @@
         });
 
         function showModal(message, callback) {
-            if (message = 'Data submitted successfully!') {
-                $('#modalMessage').text('Data Sudah Diverifikasi');
-                $('#alertModal').modal('show');
-            } else {
-                $('#modalMessage').text(message);
-                $('#alertModal').modal('show');
-            }
+            $('#modalMessage').text(message);
+            $('#alertModal').modal('show');
 
             if (callback) {
                 $('#alertModal').on('hidden.bs.modal', function() {
@@ -195,8 +229,9 @@
                     $(this).off('hidden.bs.modal'); // Remove the callback to avoid multiple triggers
                 });
             }
+
             $('#modalok').on('click', function() {
-                location.reload();
+                $('#alertModal').modal('hide');
             });
         }
     });

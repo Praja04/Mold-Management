@@ -44,13 +44,7 @@
                                         <input type="password" id="password" name="password" class="form-control" placeholder="Password" />
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Role</label>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text"><i class="ti-user"></i></span>
-                                        <input type="text" id="role" name="role" class="form-control" placeholder="Role" />
-                                    </div>
-                                </div>
+                              
                                 <div class="form-group">
                                     <label class="form-label">Suplier</label>
                                     <div class="input-group mb-3">

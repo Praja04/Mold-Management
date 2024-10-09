@@ -117,7 +117,6 @@
                                 </form>
 
                             </div>
-
                             <!-- /.tab-pane -->
                         </div>
                         <!-- /.tab-content -->
@@ -191,13 +190,15 @@
         <div class="modal fade" id="updateDataModal" tabindex="-1" aria-labelledby="updateDataModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form method="post" action="<?= base_url('user/updateAddressSupplier') ?>">
+                    <!-- Remove the action from the form and handle it via JS -->
+                    <form id="updateDataForm">
                         <div class="modal-header">
                             <h5 class="modal-title" id="updateDataModalLabel">Update Address & Supplier</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" name="username" value="<?= esc($data_profil['username']) ?>">
+                            <input type="hidden" name="supplier_existing" value="<?= esc($data_profil['suplier']) ?>">
                             <div class="form-group">
                                 <label for="inputAddress">Address</label>
                                 <input type="text" class="form-control" name="address" id="inputAddress" placeholder="Enter new address" value="<?= esc($data_profil['address']) ?>">
@@ -205,6 +206,10 @@
                             <div class="form-group">
                                 <label for="inputSupplier">Supplier</label>
                                 <input type="text" class="form-control" name="supplier" id="inputSupplier" placeholder="Enter new supplier" value="<?= esc($data_profil['suplier']) ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputSupplier">Email Suplier</label>
+                                <input type="email" class="form-control" name="email" id="email" placeholder="Enter new email supplier" value="<?= esc($data_profil['email']) ?>">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -215,6 +220,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Modal for Delete Account -->
         <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
@@ -228,7 +234,7 @@
                             </div>
                             <div class="modal-body">
                                 <input type="hidden" name="username" value="<?= esc($data_profil['username']) ?>">
-                                <p>Are you sure you want to delete this account? This action cannot be undone.</p>
+                                <p>Apakah yakin menghapus akun ini? setelah dihapus tidak dapat melakukan tindakan </p>
                             </div>
                             <div class="modal-footer">
                                 <button type="submit" class="btn btn-danger">Delete</button>
@@ -256,7 +262,7 @@
         <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form method="post" action="<?= base_url('user/changePassword') ?>">
+                    <form id="changeDataForm" action="<?= base_url('user/changePassword') ?>">
                         <div class="modal-header">
                             <h5 class="modal-title" id="changePasswordModalLabel">Change Password for <?= esc($data_profil['username']) ?></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -289,6 +295,7 @@
 
 
 <script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
+<script src="<?= base_url() ?>assets/vendor_components/sweetalert/sweetalert2.all.min.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
         // Initialize DataTables
@@ -300,7 +307,94 @@
             "pageLength": 5, // Default number of rows per page
 
         });
+
+        $('#updateDataForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent the form from submitting normally
+
+            // Get form data
+            var formData = $(this).serialize(); // Collect form data
+
+            $.ajax({
+                type: 'POST',
+                url: '<?= base_url('user/updateAddressSupplier') ?>', // Use the correct controller route
+                data: formData,
+                dataType: 'json', // Expect JSON response
+                success: function(response) {
+                    if (response.message) {
+                        // Show success message using SweetAlert2
+                        sweetalertUpdate(response.message);
+
+                        // Optionally, close the modal after the success alert
+                        $('#updateDataModal').modal('hide');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response
+                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.error : 'An error occurred!';
+                    alert(errorMessage);
+                }
+            });
+        });
+        $('#changeDataForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent the form from submitting normally
+
+            // Get form data
+            var formData = $(this).serialize(); // Collect form data
+
+            $.ajax({
+                type: 'POST',
+                url: '<?= base_url('user/changePassword') ?>', // Use the correct controller route
+                data: formData,
+                dataType: 'json', // Expect JSON response
+                success: function(response) {
+                    if (response.message) {
+                        // Show success message using SweetAlert2
+                        sweetalertChange(response.message);
+
+                        // Optionally, close the modal after the success alert
+                        $('#changePasswordModal').modal('hide');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response
+                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.error : 'An error occurred!';
+                    alert(errorMessage);
+                }
+            });
+        });
+
+        function sweetalertUpdate(message) {
+            Swal.fire({
+                title: "Data Updated!",
+                text: message, // Pass the message as a parameter
+                icon: "success",
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Menutup modal sebelum redirect
+                    $('#updateDataModal').modal('hide');
+                    // Redirect ketika 'ok' di klik
+                    window.location.href = '<?= base_url('suplier/cbi') ?>';
+                }
+            });
+        }
+
+        function sweetalertChange(message) {
+            Swal.fire({
+                title: "Password Updated!",
+                text: message, // Pass the message as a parameter
+                icon: "success",
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Menutup modal sebelum redirect
+                    $('#changePasswordModal').modal('hide');
+                    // Redirect ketika 'ok' di klik
+                    location.reload();
+                }
+            });
+        }
+
     })
 </script>
 <?= $this->endSection() ?>
-

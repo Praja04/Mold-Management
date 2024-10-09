@@ -53,7 +53,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label">Tanggal Report</label>
-                                            <input type="date" id="tanggal_perbaikan" class="form-control">
+                                            <input type="date" id="tanggal_perbaikan" class="form-control" required>
                                         </div>
                                     </div>
 
@@ -66,11 +66,11 @@
                                     <hr class="my-15">
                                     <div class="form-group">
                                         <label class="form-label">Kondisi Sekarang</label>
-                                        <input type="text" class="form-control" id="kondisi_perbaikan">
+                                        <input type="text" class="form-control" id="kondisi_perbaikan" required>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Gambar Kerusakan:</label>
-                                        <input class="form-control" type="file" id="gambar_rusak">
+                                        <input class="form-control" type="file" id="gambar_rusak" required>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Keterangan Tambahan</label>
@@ -86,6 +86,11 @@
                 </div>
 
             </div>
+
+            <div id="loading" style="display: none;">
+                <img src="<?= base_url() ?>images/loads/loads.gif" alt="Loading..." />
+            </div>
+
         </section>
     </div>
 </div>
@@ -146,8 +151,25 @@
             }
         }
 
+
         $('#submitBtn').click(function() {
-            submitForm();
+            const requiredInputs = $('#form1-content [required]');
+            let allValid = true;
+
+            requiredInputs.each(function() {
+                if (!$(this).val()) {
+                    $(this).addClass('is-invalid');
+                    allValid = false;
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            if (allValid) {
+                submitForm();
+            } else {
+                showToast('Please fill out all required fields.', true);
+            }
         });
 
         $.ajax({
@@ -174,6 +196,7 @@
         });
 
         function submitForm() {
+            $('#loading').show();
             var formData = new FormData();
             formData.append('moldId', moldId);
             formData.append('part_name', $('#partname').val());
@@ -190,13 +213,16 @@
                 contentType: false,
                 success: function(response) {
                     if (response.hasOwnProperty('message')) {
+                        $('#loading').hide();
                         showToast(response.message);
                         setTimeout(() => window.location.href = ('<?= base_url('pengajuan/perbaikan') ?>'), 2000);
                     } else if (response.hasOwnProperty('error')) {
+                        $('#loading').hide();
                         showToast(response.error, true);
                     }
                 },
                 error: function(xhr, status, error) {
+                    $('#loading').hide();
                     console.error('Error:', error);
                 }
             });

@@ -94,6 +94,10 @@ $routes->get('detail/suplier', 'Admin::detail_suplier_cbi');
 $routes->post('user/updateAddressSupplier', 'Admin::updateAddressSupplier');
 $routes->post('user/deleteAccount', 'Admin::deleteAccount');
 $routes->post('user/changePassword', 'Admin::changePassword');
+$routes->get('admin/setting', 'Admin::settings_admin');
+$routes->post('add/admin', 'Admin::add_admin');
+$routes->get('/export-excel/(:any)', 'Admin::exportExcel/$1');
+
 
 
 

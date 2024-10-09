@@ -39,8 +39,13 @@
 							<?php if (session()->get('type_user') == 'api') { ?>
 								<!-- <a class="dropdown-item" href="<?= base_url() ?>profile"><i class="ti-user text-muted mr-2"></i> Profile</a> -->
 							<?php } ?>
-							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="<?= base_url() ?>logout"><i class="ti-lock text-muted me-2"></i> Logout</a>
+
+							<?php if (session()->get('role') == 'admin') : ?>
+								<a class="dropdown-item" href="<?= base_url() ?>logout"><i class="ti-lock text-muted me-2"></i> Logout</a>
+								<a class="dropdown-item" href="<?= base_url() ?>admin/setting"><i class="ti-settings text-muted me-2"></i> Settings</a>
+							<?php else : ?>
+								<a class="dropdown-item" href="<?= base_url() ?>logout"><i class="ti-lock text-muted me-2"></i> Logout</a>
+							<?php endif; ?>
 						</li>
 					</ul>
 				</li>

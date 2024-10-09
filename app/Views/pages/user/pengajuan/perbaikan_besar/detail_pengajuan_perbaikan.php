@@ -53,8 +53,17 @@
                                                     <td><?= $user['tanggal_pengajuan']; ?></td>
                                                     <td><?= $user['kondisi_mold']; ?></td>
                                                     <td>
-                                                        <img src="<?= base_url('uploads/' . $user['gambar_rusak']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_rusak']) ?>">
+                                                        <?php if (pathinfo($user['gambar_rusak'], PATHINFO_EXTENSION) === 'pdf') : ?>
+                                                            <!-- Tampilkan tombol untuk membuka PDF dalam modal -->
+                                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pdfModal" data-pdf="<?= base_url('uploads/' . $user['gambar_rusak']) ?>">
+                                                                Lihat PDF
+                                                            </button>
+                                                        <?php else : ?>
+                                                            <!-- Jika file adalah gambar, tampilkan gambar -->
+                                                            <img src="<?= base_url('uploads/' . $user['gambar_rusak']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_rusak']) ?>">
+                                                        <?php endif; ?>
                                                     </td>
+
                                                     <td>
                                                         <?php if ($user['terima_perbaikan'] != 'no') : ?>
                                                             <button class="btn btn-success">Approved</button>
@@ -78,7 +87,7 @@
                                                     </td>
                                                     <td>
                                                         <?php if ($user['gambar_diperbaiki'] != null) : ?>
-                                                            <img src="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>" alt="Gambar Kerusakan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>">
+                                                            <img src="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>" alt="Gambar perbaikan" class="img-thumbnail" style="max-width: 100px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" data-image="<?= base_url('uploads/' . $user['gambar_diperbaiki']) ?>">
                                                         <?php else : ?>
                                                             <p style="color: red;">Belum Upload</p>
                                                         <?php endif; ?>
@@ -133,6 +142,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -147,6 +157,7 @@
                 </div>
             </div>
 
+            <!-- Modal untuk PDF -->
             <div class="modal fade" id="pdfModal2" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -160,7 +171,19 @@
                     </div>
                 </div>
             </div>
-
+            <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pdfModalLabel">PDF Kerusakan</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <iframe id="modalPdf" src="" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
         <!-- /.content -->
     </div>
@@ -186,6 +209,12 @@
             var pdfUrl = $(this).data('pdf');
             $('#pdfViewer2').attr('src', pdfUrl);
             $('#pdfModal2').modal('show');
+        });
+        $('#pdfModal').on('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var pdfSrc = button.getAttribute('data-pdf');
+            var modalPdf = document.getElementById('modalPdf');
+            modalPdf.src = pdfSrc;
         });
     });
 </script>

@@ -28,34 +28,29 @@
                 </div>
 
                 <!-- Bagian Kanan -->
+
                 <div class="list-inline text-end">
                     <div class="form-group">
-                        <?php if (!empty($detail['dokumen_mold'])) : ?>
-                            <?php if ($detail['dokumen_mold'] == null) : ?>
-                                <button data-bs-toggle="modal" data-bs-target="#modal-dokumen" class="btn btn-info" style="font-size: small;">Upload Dokumen Mold <span id="dokumen" class="mdi mdi-file-document"></span></button>
-                            <?php else : ?>
-                                <li class="dropdown">
-                                    <button class="dropdown-toggle btn btn-primary-light px-10" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                                        Dokumen Mold
-                                    </button>
-
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold']); ?>">Dokumen 1</a>
-                                        <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold2']); ?>">Dokumen 2</a>
-                                        <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold3']); ?>">Dokumen 3</a>
-                                        <a data-bs-toggle="modal" data-id-dokumen="<?= $detail['Id'] ?>" data-bs-target="#modal-update-dokumen" class=" dropdown-item active bg-warning text-white">Ubah Dokumen</a>
-                                    </div>
-
-                                </li>
-                            <?php endif; ?>
-                        <?php else : ?>
+                        <?php if (empty($detail['dokumen_mold'])) : ?>
                             <button data-bs-toggle="modal" data-bs-target="#modal-dokumen" class="btn btn-info" style="font-size: small;">Upload Dokumen Mold <span id="dokumen" class="mdi mdi-file-document"></span></button>
+                        <?php else : ?>
+                            <li class="dropdown">
+                                <button class="dropdown-toggle btn btn-primary-light px-10" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                                    Dokumen Mold
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold']); ?>">Dokumen 1</a>
+                                    <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold2']); ?>">Dokumen 2</a>
+                                    <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold3']); ?>">Dokumen 3</a>
+                                    <a data-bs-toggle="modal" data-id-dokumen="<?= $detail['Id'] ?>" data-bs-target="#modal-update-dokumen" class="dropdown-item active bg-warning text-white">Ubah Dokumen</a>
+                                </div>
+                            </li>
                         <?php endif; ?>
+
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Main content -->
         <section class="content">
             <div class="row">
@@ -186,12 +181,27 @@
                                                 </tr>
                                                 <tr>
                                                     <td>Total Produksi</td>
-                                                    <td><?= $jumlah['jumlah_produk'] ?> pcs</td>
+                                                    <td><?= number_format($jumlah['jumlah_produk'], 0, ',', '.') ?> pcs</td>
+                                                    <td>
+                                                        <form action="<?= base_url('export-excel/') ?><?= urlencode($moldData[0]['ITEM']) ?>"   method="get" style="display: inline;">
+                                                            <button type="submit" class="btn btn-success text-white me-0">
+                                                                <span class="mdi mdi-file-excel-box"></span> Export Excel
+                                                            </button>
+                                                            <select name="tahun" required>
+                                                                <?php
+                                                                $currentYear = date('Y');
+                                                                for ($year = $currentYear; $year >= $currentYear - 10; $year--) {
+                                                                    echo "<option value=\"$year\">$year</option>";
+                                                                }
+                                                                ?>
+                                                            </select>
+                                                        </form>
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td>Total Perbaikan Harian (Kecil)</td>
                                                     <td>
-                                                        <?= $report ?>
+                                                        <?= number_format($report, 0, ',', '.') ?>
                                                     </td>
                                                     <td>
                                                         <a style="margin-left: 15px;" class="btn btn-primary text-white me-0" href="<?= base_url('daily/detail') ?>?namaMold=<?= urlencode($moldData[0]['ITEM']) ?>"><span class="mdi mdi-calendar-today"></span> harian</a>
@@ -200,7 +210,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td>Total Perbaikan Perbaikan Besar</td>
-                                                    <td><?= $perbaikan ?></td>
+                                                    <td><?= number_format($perbaikan, 0, ',', '.') ?></td>
                                                     <td>
                                                         <a style="margin-left: 15px;" class="btn btn-primary text-white me-0" href="<?= base_url('perbaikan/besar/detail') ?>?namaMold=<?= urlencode($moldData[0]['ITEM']) ?>"><span class="mdi mdi-package-variant"></span> perbaikan</a>
                                                     </td>

@@ -130,6 +130,9 @@
                 </div>
 
             </div>
+            <div id="loading" style="display: none;">
+                <img src="<?= base_url() ?>images/loads/loads.gif" alt="Loading..." />
+            </div>
         </section>
     </div>
 </div>
@@ -312,6 +315,7 @@
         }
 
         function submitForm() {
+            $('#loading').show();
             const formData = new FormData();
             formData.append('moldId', moldId);
             formData.append('nama_mold', $('#partname').val());
@@ -384,14 +388,17 @@
                 contentType: false,
                 success: function(response) {
                     if (response.message) {
+                        $('#loading').hide();
                         showToast(response.message);
                         setTimeout(() => window.location.href = ('<?= base_url('dashboard') ?>'), 2000);
                     } else if (response.error) {
+                        $('#loading').hide();
                         showToast(response.error, true);
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
+                    $('#loading').hide();
                 }
             });
         }

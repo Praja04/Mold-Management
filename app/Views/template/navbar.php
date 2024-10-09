@@ -6,7 +6,7 @@
 				<!-- sidebar menu-->
 				<ul class="sidebar-menu" data-widget="tree">
 					<li class="header">Menu</li>
-					<?php if (session()->get('role') == 'admin') : ?>
+					<?php if (session()->get('role') == 'admin' || session()->get('role') == 'reader') : ?>
 						<li class="treeview">
 							<a href="#">
 								<i class="icon-Layout-4-blocks"><span class="path1"></span><span class="path2"></span></i>

@@ -184,6 +184,9 @@
                     <!-- /.box -->
                 </div>
             </div>
+            <div id="loading" style="display: none;">
+                <img src="<?= base_url() ?>images/loads/loads.gif" alt="Loading..." />
+            </div>
         </section>
         <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -213,7 +216,6 @@
 <script>
     $(document).ready(function() {
         let user_id = '';
-
 
         $(document).on('change', '.jenis_ng', function() {
             const index = $(this).data('index');
@@ -281,7 +283,7 @@
         }
 
         function submitForm() {
-
+            $('#loading').show();
             var formData = new FormData();
             formData.append('user_id', user_id);
             formData.append('ITEM', $('#ITEM').val());
@@ -311,6 +313,7 @@
                 success: function(response) {
                     // Cek apakah sukses atau gagal
                     if (response.hasOwnProperty('message')) {
+                        $('#loading').hide();
                         console.log(user_id);
 
                         $('#modalok').on('click', function() {
@@ -318,14 +321,16 @@
                         });
                         showModal(response.message);
                     } else if (response.hasOwnProperty('error')) {
+                        $('#loading').hide();
                         showModal(response.error, true);
                     }
                 },
                 error: function(xhr, status, error) {
                     console.log('Error:', error);
                     console.log('text:', xhr);
-                    alert('Terjadi kesalahan saat pengiriman data.');
-                }
+                    $('#loading').hide();
+                    showModal(response.error, true);
+                } 
             });
         }
 

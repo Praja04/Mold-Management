@@ -90,6 +90,15 @@
                 <div class="box-body">
                     <div class="row">
                         <div class="col-lg-12 col-12">
+                            <div class="col-lg-1">
+                                <form action="">
+                                    <select class="form-select" name="filter_ambang_batas" id="filter_ambang_batas">
+                                        <option value="above-1.5m">Shot mold > 1,5 juta</option>
+                                        <option value="under-1.5m">Shot mold < 1,5 juta</option>
+                                    </select>
+                                </form>
+                            </div>
+
                             <div id="container"></div>
                         </div>
                     </div>
@@ -493,6 +502,14 @@
                 filterAndRenderCharts();
                 renderTotalAkumulasiShots();
                 renderTotalAkumulasiRejection();
+                $('#filter_ambang_batas').change(function() {
+                    var selectedValue = $(this).val();
+                    if (selectedValue === 'above-1.5m') {
+                        renderFilteredShots(1500000); // Tampilkan mold di atas 1,5 juta
+                    } else {
+                        renderFilteredShots2(1500000); // Tampilkan semua mold
+                    }
+                });
                 // Populate the filters
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -551,6 +568,172 @@
             //monthFilter.val(currentMonth).trigger('change');
         }
 
+
+        function renderFilteredShots(ambangBatas) {
+            const totalShotsByMold = accumulatedShotsData.reduce((acc, shot) => {
+                if (!acc[shot.nama_mold]) {
+                    acc[shot.nama_mold] = 0;
+                }
+                acc[shot.nama_mold] += shot.total;
+                return acc;
+            }, {});
+
+            // Hanya ambil mold yang total shots-nya di atas ambang batas
+            const filteredShots = Object.entries(totalShotsByMold)
+                .filter(([nama_mold, total]) => total > ambangBatas) // Filter di sini
+                .sort((a, b) => b[1] - a[1]); // Sort berdasarkan total shots descending
+
+            // Extract sorted categories (nama_mold) dan values (totalShots)
+            const categoriesShot = filteredShots.map(item => item[0]);
+            const akumulasiShotData = filteredShots.map(item => item[1]);
+
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Total Keseluruhan Akumulasi Shot per-mold'
+                },
+                xAxis: {
+                    categories: categoriesShot,
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Jumlah Akumulasi Shot'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return Highcharts.numberFormat(this.value, 0, '.', ',');
+                        }
+                    },
+                    plotLines: [{
+                        color: 'red',
+                        width: 2,
+                        value: ambangBatas,
+                        label: {
+                            text: `Warning ${Highcharts.numberFormat(ambangBatas, 0, '.', ',')} shot`,
+                            align: 'right',
+                            style: {
+                                color: 'red',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        zIndex: 5
+                    }]
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td><td style="padding:0"><b>{point.y:,.0f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Akumulasi Shot',
+                    data: akumulasiShotData.map(value => ({
+                        y: value,
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return Highcharts.numberFormat(this.y, 0, '.', ',');
+                            }
+                        }
+                    }))
+                }]
+            });
+        }
+
+        function renderFilteredShots2(ambangBatas) {
+            const totalShotsByMold = accumulatedShotsData.reduce((acc, shot) => {
+                if (!acc[shot.nama_mold]) {
+                    acc[shot.nama_mold] = 0;
+                }
+                acc[shot.nama_mold] += shot.total;
+                return acc;
+            }, {});
+
+            // Hanya ambil mold yang total shots-nya di atas ambang batas
+            const filteredShots = Object.entries(totalShotsByMold)
+                .filter(([nama_mold, total]) => total < ambangBatas) // Filter di sini
+                .sort((a, b) => b[1] - a[1]); // Sort berdasarkan total shots descending
+
+            // Extract sorted categories (nama_mold) dan values (totalShots)
+            const categoriesShot = filteredShots.map(item => item[0]);
+            const akumulasiShotData = filteredShots.map(item => item[1]);
+
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Total Keseluruhan Akumulasi Shot per-mold'
+                },
+                xAxis: {
+                    categories: categoriesShot,
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Jumlah Akumulasi Shot'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return Highcharts.numberFormat(this.value, 0, '.', ',');
+                        }
+                    },
+                    plotLines: [{
+                        color: 'red',
+                        width: 2,
+                        value: ambangBatas,
+                        label: {
+                            text: `Warning ${Highcharts.numberFormat(ambangBatas, 0, '.', ',')} shot`,
+                            align: 'right',
+                            style: {
+                                color: 'red',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        zIndex: 5
+                    }]
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td><td style="padding:0"><b>{point.y:,.0f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: 'Akumulasi Shot',
+                    data: akumulasiShotData.map(value => ({
+                        y: value,
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function() {
+                                return Highcharts.numberFormat(this.y, 0, '.', ',');
+                            }
+                        }
+                    }))
+                }]
+            });
+        }
+
+
         function renderTotalAkumulasiShots() {
             // Group data by `nama_mold` and calculate total shots per mold
             const totalShotsByMold = accumulatedShotsData.reduce((acc, shot) => {
@@ -588,7 +771,21 @@
                         formatter: function() {
                             return Highcharts.numberFormat(this.value, 0, '.', ',');
                         }
-                    }
+                    },
+                    plotLines: [{
+                        color: 'red',
+                        width: 2,
+                        value: 1500000,
+                        label: {
+                            text: 'Warning 1,5 juta shot',
+                            align: 'right',
+                            style: {
+                                color: 'red',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        zIndex: 5
+                    }]
                 },
                 tooltip: {
                     headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
@@ -617,6 +814,7 @@
                 }]
             });
         }
+
 
         function renderTotalAkumulasiRejection() {
             // Group data by `nama_mold` and calculate total shots per mold
@@ -730,7 +928,21 @@
                         formatter: function() {
                             return Highcharts.numberFormat(this.value, 0, '.', ',');
                         }
-                    }
+                    },
+                    plotLines: [{
+                        color: 'red',
+                        width: 2,
+                        value: 1500000,
+                        label: {
+                            text: 'Warning 1,5 juta shot',
+                            align: 'right',
+                            style: {
+                                color: 'red',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        zIndex: 5
+                    }]
                 },
                 tooltip: {
                     headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
