@@ -342,10 +342,12 @@ class Admin extends BaseController
     //submit form verifikasi
     public function submit_verifikasi()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
         }
-
         try {
             $moldModel = new DetailMold();
 
@@ -396,10 +398,12 @@ class Admin extends BaseController
     }
     public function update_data_mold()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
         }
-
         try {
             $moldModel = new MoldItemModel();
             $id = $this->request->getPost('id');
@@ -435,8 +439,11 @@ class Admin extends BaseController
     }
     public function update_status_mold()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
         }
 
         try {
@@ -501,8 +508,8 @@ class Admin extends BaseController
     public function register_mold()
     {
         // Cek apakah user sudah login
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
         }
         try {
             $supplierModel = new SupplierModel();
@@ -672,41 +679,45 @@ class Admin extends BaseController
     }
     public function delete_mold($id)
     {
-        // Initialize models
-        $mold = new MoldItemModel();
-        $supplier = new SupplierModel();
-        $detail = new DetailMold();
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
+        } else {
+            // Initialize models
+            $mold = new MoldItemModel();
+            $supplier = new SupplierModel();
+            $detail = new DetailMold();
 
-        // Retrieve the record from DetailMold using Mold_Id
-        $record = $detail->where('Mold_Id', $id)->first();
+            // Retrieve the record from DetailMold using Mold_Id
+            $record = $detail->where('Mold_Id', $id)->first();
 
-        if ($record) {
-            // Delete the associated image files
-            $filesToDelete = ['Gambar_Mold'];
+            if ($record) {
+                // Delete the associated image files
+                $filesToDelete = ['Gambar_Mold'];
 
-            foreach ($filesToDelete as $fileField) {
-                if (!empty($record[$fileField])) {
-                    $filePath = ROOTPATH . 'public/uploads/' . $record[$fileField];
-                    if (file_exists($filePath)) {
-                        unlink($filePath); // Delete the file
+                foreach ($filesToDelete as $fileField) {
+                    if (!empty($record[$fileField])) {
+                        $filePath = ROOTPATH . 'public/uploads/' . $record[$fileField];
+                        if (file_exists($filePath)) {
+                            unlink($filePath); // Delete the file
+                        }
                     }
                 }
+
+                // Delete related records from SupplierModel based on id_mold
+                $supplier->where('id_mold', $id)->delete();
+
+                // Delete the record from DetailMold using Mold_Id
+                $detail->where('Mold_Id', $id)->delete();
+
+                // Delete the record from MoldItemModel using NO
+                $mold->where('NO', $id)->delete();
+
+                // If deletion is successful, return success response
+                return $this->response->setJSON(['success' => true, 'message' => 'Record and associated files deleted successfully!']);
+            } else {
+                // If the record is not found, return error response
+                return $this->response->setJSON(['success' => false, 'message' => 'Record not found.']);
             }
-
-            // Delete related records from SupplierModel based on id_mold
-            $supplier->where('id_mold', $id)->delete();
-
-            // Delete the record from DetailMold using Mold_Id
-            $detail->where('Mold_Id', $id)->delete();
-
-            // Delete the record from MoldItemModel using NO
-            $mold->where('NO', $id)->delete();
-
-            // If deletion is successful, return success response
-            return $this->response->setJSON(['success' => true, 'message' => 'Record and associated files deleted successfully!']);
-        } else {
-            // If the record is not found, return error response
-            return $this->response->setJSON(['success' => false, 'message' => 'Record not found.']);
         }
     }
 
@@ -761,8 +772,11 @@ class Admin extends BaseController
 
     public function update_data_ITEM()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
         }
 
         try {
@@ -801,8 +815,11 @@ class Admin extends BaseController
     }
     public function pemindahan_mold()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
         }
 
         try {
@@ -827,8 +844,11 @@ class Admin extends BaseController
 
     public function submit_dokumen()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
         }
 
         try {
@@ -873,6 +893,9 @@ class Admin extends BaseController
 
     public function update_dokumen()
     {
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
+        }
         try {
             $id_dokumen = $this->request->getPost('id');
 
@@ -960,8 +983,8 @@ class Admin extends BaseController
 
     public function updateAddressSupplier()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
         }
         try {
             // Load models
@@ -982,7 +1005,7 @@ class Admin extends BaseController
                 ->update();
 
             $userModel->where('username', $username)
-                ->set(['suplier' => $supplier, 'address' => $address,'email' => $email])
+                ->set(['suplier' => $supplier, 'address' => $address, 'email' => $email])
                 ->update();
             $perbaikanBesarModel->where('suplier', $supplier_existing)
                 ->set('suplier', $supplier)->update();
@@ -998,8 +1021,11 @@ class Admin extends BaseController
 
     public function deleteAccount()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return redirect()->to(base_url("suplier/cbi"))->with('status', 'You dont have access!');
         }
         $userModel = new UserModel();
         $username = $this->request->getPost('username');
@@ -1011,8 +1037,11 @@ class Admin extends BaseController
 
     public function changePassword()
     {
-        if (!session()->has('admin_nama')) {
-            return $this->redirectLogin();
+        // if (!session()->has('admin_nama')) {
+        //     return $this->redirectLogin();
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
         }
         try {
             // Mendapatkan data dari form
@@ -1075,7 +1104,7 @@ class Admin extends BaseController
         $data = array_merge($data, $session_data);
         return view('pages/admin/dashboard/admin_setting', $data);
     }
-    
+
     public function add_admin()
     {
         if (!session()->has('admin_nama')) {
@@ -1167,6 +1196,4 @@ class Admin extends BaseController
         $writer->save('php://output');
         exit;
     }
-
-
 }

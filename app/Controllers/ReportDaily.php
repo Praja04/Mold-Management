@@ -215,7 +215,7 @@ class ReportDaily extends BaseController
             return redirect()->to(base_url('/'));
         }
         $nama_mold = $this->request->getGet('namaMold');
-
+        $moldData['nama_mold']=$nama_mold;
         $moldData['historymoldData'] = $this->reportPerbaikan->getMoldDataWithSupplier($nama_mold);
         return view('pages/admin/perbaikan_daily/perbaikan_detail', $moldData);
     }
@@ -318,10 +318,9 @@ class ReportDaily extends BaseController
 
     public function update_report($id)
     {
-        // if (session()->get('user_nama') == '') {
-        //     session()->setFlashdata('gagal', 'Anda belum login');
-        //     return redirect()->to(base_url('/'));
-        // }
+         if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
+        }
         $allowed_roles = ['admin'];
         $user_role = session()->get('role');
         if (!in_array($user_role, $allowed_roles)) {
@@ -414,10 +413,9 @@ class ReportDaily extends BaseController
     }
     public function delete_report($id)
     {
-        // if (session()->get('user_nama') == '') {
-        //     session()->setFlashdata('gagal', 'Anda belum login');
-        //     return redirect()->to(base_url('/'));
-        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
+        }
 
         // $userID = session()->get('user_id');
 

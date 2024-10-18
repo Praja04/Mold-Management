@@ -230,9 +230,13 @@ class PerbaikanBesar extends BaseController
 
     public function approved_perbaikan()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        // if (session()->get('admin_nama') == '') {
+        //     session()->setFlashdata('gagal', 'Anda belum login');
+        //     return redirect()->to(base_url('/'));
+        // }
+
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
         }
 
         try {
@@ -321,11 +325,13 @@ class PerbaikanBesar extends BaseController
     }
     public function verifikasi_perbaikan_admin()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        // if (session()->get('admin_nama') == '') {
+        //     session()->setFlashdata('gagal', 'Anda belum login');
+        //     return redirect()->to(base_url('/'));
+        // }
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
         }
-
         try {
             $perbaikanBesarModel = new PerbaikanBesarModel();
             $id_perbaikan = $this->request->getPost('id_perbaikan');
@@ -454,7 +460,6 @@ class PerbaikanBesar extends BaseController
             return redirect()->to(base_url('/'));
         }
 
-
         try {
             // Inisialisasi model
             $perbaikan = new PerbaikanBesarModel();
@@ -466,15 +471,17 @@ class PerbaikanBesar extends BaseController
             // Validasi file upload
             if ($dokumen_pendukung && $dokumen_pendukung->isValid() && !$dokumen_pendukung->hasMoved()) {
                 // Validasi ukuran dan tipe file
-                $maxSize = 10 * 1024 * 1024; // 10MB
-                $allowedTypes = ['application/pdf'];
+                $maxSize = 10 * 1024 * 1024; // Maksimal ukuran file 10MB
+                $allowedTypes = ['application/pdf']; // Hanya izinkan file PDF
 
+                // Cek ukuran file
                 if ($dokumen_pendukung->getSize() > $maxSize) {
-                    return $this->response->setJSON(['error' => 'Ukuran file terlalu besar. Maksimal 2MB.']);
+                    return $this->response->setJSON(['success' => false, 'error' => 'Ukuran file terlalu besar. Maksimal 10MB.']);
                 }
 
+                // Cek tipe file
                 if (!in_array($dokumen_pendukung->getMimeType(), $allowedTypes)) {
-                    return $this->response->setJSON(['error' => 'Format file tidak didukung. Hanya PDF.']);
+                    return $this->response->setJSON(['success' => false, 'error' => 'Format file tidak didukung. Hanya file PDF yang diizinkan.']);
                 }
 
                 // Generate nama file yang unik dan pindahkan file ke folder uploads
@@ -488,24 +495,28 @@ class PerbaikanBesar extends BaseController
                 $perbaikan->update($id_perbaikan, $data);
 
                 // Kirim respons sukses
-                return $this->response->setJSON(['message' => 'Data berhasil diperbarui!']);
+                return $this->response->setJSON(['success' => true, 'message' => 'Dokumen berhasil diunggah dan data diperbarui.']);
             } else {
-                return $this->response->setJSON(['error' => 'Gagal mengunggah file.']);
+                // Kirim pesan error jika file tidak valid atau gagal diunggah
+                return $this->response->setJSON(['success' => false, 'error' => 'Gagal mengunggah file.']);
             }
         } catch (\Exception $e) {
             // Log error dan kirim pesan kesalahan ke klien
             log_message('error', $e->getMessage());
-            return $this->response->setJSON(['error' => 'Terjadi kesalahan saat memperbarui data.']);
+            return $this->response->setJSON(['success' => false, 'error' => 'Terjadi kesalahan saat memperbarui data.']);
         }
     }
+
     public function status_temporary_admin()
     {
-        if (session()->get('admin_nama') == '') {
-            session()->setFlashdata('gagal', 'Anda belum login');
-            return redirect()->to(base_url('/'));
+        // if (session()->get('admin_nama') == '') {
+        //     session()->setFlashdata('gagal', 'Anda belum login');
+        //     return redirect()->to(base_url('/'));
+        // }
+
+        if (session()->get('role') != 'admin') {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete! You dont have access']);
         }
-
-
         try {
             $perbaikanBesarModel = new PerbaikanBesarModel();
             $id_perbaikan = $this->request->getPost('id_perbaikan');

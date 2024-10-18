@@ -320,12 +320,16 @@
                 data: formData,
                 dataType: 'json', // Expect JSON response
                 success: function(response) {
-                    if (response.message) {
+                    if (response.success) {
                         // Show success message using SweetAlert2
-                        sweetalertUpdate(response.message);
+                        sweetalertUpdate(response.message, true);
 
                         // Optionally, close the modal after the success alert
                         $('#updateDataModal').modal('hide');
+
+                    } else {
+                        $('#updateDataModal').modal('hide');
+                        sweetalertUpdate(response.message, false);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -363,28 +367,42 @@
             });
         });
 
-        function sweetalertUpdate(message) {
+        function sweetalertUpdate(message, isSuccess) {
+            let title = isSuccess ? "Data Updated!" : "Update Failed!";
+            let icon = isSuccess ? "success" : "error";
+            let confirmButtonText = isSuccess ? 'OK' : 'Try Again';
+
             Swal.fire({
-                title: "Data Updated!",
-                text: message, // Pass the message as a parameter
-                icon: "success",
-                confirmButtonText: 'OK'
+                title: title,
+                text: message,
+                icon: icon,
+                confirmButtonText: confirmButtonText
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Menutup modal sebelum redirect
-                    $('#updateDataModal').modal('hide');
-                    // Redirect ketika 'ok' di klik
-                    window.location.href = '<?= base_url('suplier/cbi') ?>';
+                    if (isSuccess) {
+                        // Menutup modal sebelum redirect jika berhasil
+                        $('#updateDataModal').modal('hide');
+                        // Redirect ketika 'OK' di klik
+                        window.location.href = '<?= base_url('suplier/cbi') ?>';
+                    } else {
+                        // Jika gagal, mungkin hanya menutup modal atau menampilkan pesan lain
+                        $('#updateDataModal').modal('hide');
+                    }
                 }
             });
         }
 
-        function sweetalertChange(message) {
+
+        function sweetalertChange(message, isSuccess) {
+            let title = isSuccess ? "Password Updated!" : "Update Failed!";
+            let icon = isSuccess ? "success" : "error";
+            let confirmButtonText = isSuccess ? 'OK' : 'Try Again';
+
             Swal.fire({
-                title: "Password Updated!",
+                title: title,
                 text: message, // Pass the message as a parameter
-                icon: "success",
-                confirmButtonText: 'OK'
+                icon: icon,
+                confirmButtonText: confirmButtonText
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Menutup modal sebelum redirect

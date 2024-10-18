@@ -7,7 +7,7 @@
         <section class="content">
             <div class="box">
                 <div class="box-header with-border text-center">
-                    <h3>History Report Harian <?= $historymoldData[0]['nama_mold']?></h3>
+                    <h3>History Report Harian <?= $nama_mold?></h3>
                 </div>
                 <div class="row">
                     <div class="col-12">
@@ -274,13 +274,16 @@
                 success: function(response) {
                     if (response.success) {
                         $('#deleteModal').modal('hide'); // Hide the modal
-                        showModal('Data deleted successfully.');
+                        showModal(response.message);
 
                     } else {
-                        showModal('Failed to delete data.');
+                         $('#deleteModal').modal('hide'); 
+                        showModal(response.message);
+                       
                     }
                 },
                 error: function(xhr, status, error) {
+                    $('#deleteModal').modal('hide'); 
                     showModal('An error occurred: ' + xhr.status + ' ' + xhr.statusText);
                 }
             });

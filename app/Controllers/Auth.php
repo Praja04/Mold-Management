@@ -89,7 +89,7 @@ class Auth extends BaseController
             $data = json_decode($body, true);
 
             if (!empty($data)) {
-                $npk_admin = [3651,3650];
+                $npk_admin = [3651, 3650, 570];
 
                 if (in_array($data['npk'], $npk_admin)) {
                     $role = 'admin';
@@ -151,42 +151,47 @@ class Auth extends BaseController
 
     public function register_action()
     {
-        $userModel = new UserModel();
-
-        $username = $this->request->getPost('username');
-        $password = $this->request->getPost('password');
-        $role = 'user';
-        $suplier = $this->request->getPost('suplier');
-        $address = $this->request->getPost('address');
-
-        // Validasi input
-        if (empty($username) || empty($password) || empty($role) || empty($suplier) || empty($address)) {
-            session()->setFlashdata('gagal', 'Isi semua data!');
+        if (session()->get('role') != 'admin') {
+            session()->setFlashdata('gagal', 'You dont have access');
             return redirect()->to(base_url('register/suplier'));
+        } else {
+            $userModel = new UserModel();
+
+            $username = $this->request->getPost('username');
+            $password = $this->request->getPost('password');
+            $role = 'user';
+            $suplier = $this->request->getPost('suplier');
+            $address = $this->request->getPost('address');
+
+            // Validasi input
+            if (empty($username) || empty($password) || empty($role) || empty($suplier) || empty($address)) {
+                session()->setFlashdata('gagal', 'Isi semua data!');
+                return redirect()->to(base_url('register/suplier'));
+            }
+
+            // Cek apakah username sudah terdaftar
+            if ($userModel->where('username', $username)->countAllResults() > 0) {
+                session()->setFlashdata('gagal', 'Username sudah terdaftar, gunakan username lain.');
+                return redirect()->to(base_url('register/suplier'));
+            }
+
+            // Hash password
+            $hashedPassword = password_hash((string)$password, PASSWORD_DEFAULT);
+
+            // Menyimpan data pengguna ke database
+            $userData = [
+                'username' => $username,
+                'password' => $hashedPassword,
+                'role' => $role,
+                'suplier' => $suplier,
+                'address' => $address
+            ];
+
+            $userModel->insert($userData);
+
+            session()->setFlashdata('sukses', 'Registrasi berhasil!');
+            return redirect()->to(base_url('register/suplier')); // Kembali ke halaman register
         }
-
-        // Cek apakah username sudah terdaftar
-        if ($userModel->where('username', $username)->countAllResults() > 0) {
-            session()->setFlashdata('gagal', 'Username sudah terdaftar, gunakan username lain.');
-            return redirect()->to(base_url('register/suplier'));
-        }
-
-        // Hash password
-        $hashedPassword = password_hash((string)$password, PASSWORD_DEFAULT);
-
-        // Menyimpan data pengguna ke database
-        $userData = [
-            'username' => $username,
-            'password' => $hashedPassword,
-            'role' => $role,
-            'suplier' => $suplier,
-            'address' => $address
-        ];
-
-        $userModel->insert($userData);
-
-        session()->setFlashdata('sukses', 'Registrasi berhasil!');
-        return redirect()->to(base_url('register/suplier')); // Kembali ke halaman register
     }
 
     public function logout()

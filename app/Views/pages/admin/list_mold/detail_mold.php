@@ -859,7 +859,7 @@
                         showModal('Data deleted successfully.');
 
                     } else {
-                        showModal('Failed to delete data.');
+                        showModal(response.message);
                     }
                 },
                 error: function(xhr, status, error) {

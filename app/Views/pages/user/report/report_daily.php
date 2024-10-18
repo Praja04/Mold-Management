@@ -138,7 +138,7 @@
 </div>
 
 
-<script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script> /\
+<script src="<?= base_url() ?>assets/js/jquery-3.7.1.min.js" type="text/javascript"></script> 
 <script>
     $(document).ready(function() {
         const baseUrl = '<?= base_url() ?>';
@@ -414,7 +414,6 @@
             } else {
                 $(`#satuan`).text('Jumlah Reject NG (Pcs)');
             }
-            // $('#satuan').text('Jumlah Reject NG (pcs)');
         });
     });
 </script>

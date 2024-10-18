@@ -361,20 +361,26 @@
                 url: '<?= base_url('upload_dokumen_admin') ?>',
                 type: 'POST',
                 data: formData,
-                processData: false,
-                contentType: false,
+                processData: false, // Untuk menangani file upload
+                contentType: false, // Agar form tidak diproses sebagai URL-encoded
+                dataType: 'json', // Mengharapkan respons JSON dari server
                 success: function(response) {
                     if (response.success) {
+                        // Tampilkan modal dengan pesan sukses dari server
                         showModal(response.message);
                     } else {
-                        showModal( response.error);
+                        // Tampilkan modal dengan pesan error dari server (misalnya ukuran atau format file salah)
+                        showModal(response.error || response.message); // Gunakan 'error' jika ada, atau 'message' jika tidak ada
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
+                    // Tampilkan pesan error jika terjadi masalah di sisi server
                     showModal('Terjadi kesalahan saat mengirim data.');
                 }
             });
+
+
         });
         // Simpan data dari modal
         $('#save-button').on('click', function() {
@@ -403,8 +409,8 @@
         });
 
         function showModal(message, callback) {
-                $('#modalMessage').text(message);
-                $('#alertModal').modal('show');
+            $('#modalMessage').text(message);
+            $('#alertModal').modal('show');
 
             if (callback) {
                 $('#alertModal').on('hidden.bs.modal', function() {
