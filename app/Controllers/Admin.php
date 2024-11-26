@@ -342,60 +342,59 @@ class Admin extends BaseController
     //submit form verifikasi
     public function submit_verifikasi()
     {
-        // if (!session()->has('admin_nama')) {
-        //     return $this->redirectLogin();
-        // }
         if (session()->get('role') != 'admin') {
-            return $this->response->setJSON(['message' => 'Failed to delete! You dont have access']);
+            return $this->response->setJSON(['message' => 'Failed to delete! You don’t have access']);
         }
+
         try {
             $moldModel = new DetailMold();
-
-            // Ambil file PDF yang diunggah
-            //$lampiran_drawing = $this->request->getFile('drawing_produk');
             $gambar_mold = $this->request->getFile('gambar_mold');
-            // $gambar_part = $this->request->getFile('gambar_part');
-            // $gambar_runner = $this->request->getFile('gambar_runner');
 
-            // Validasi file PDF
+            // Validasi file upload
             if ($gambar_mold->isValid() && !$gambar_mold->hasMoved()) {
-                // Pindahkan file PDF ke direktori yang tepat
-                // $drawingname = $lampiran_drawing->getRandomName();
-                // $lampiran_drawing->move(ROOTPATH . 'public/uploads', $drawingname);
-
+                // Simpan nama file baru
                 $gambarmold = $gambar_mold->getRandomName();
-                $gambar_mold->move(ROOTPATH . 'public/uploads', $gambarmold);
+               
 
-                // $gambarpart = $gambar_part->getRandomName();
-                // $gambar_part->move(ROOTPATH . 'public/uploads', $gambarpart);
+                // Cek apakah data dengan Mold_Id sudah ada
+                $moldId = $this->request->getPost('moldIdContent');
+                $existingData = $moldModel->where('Mold_Id', $moldId)->first();
 
-                // $gambarRunner = $gambar_runner->getRandomName();
-                // $gambar_runner->move(ROOTPATH . 'public/uploads', $gambarRunner);
+                if ($existingData) {
+                    $moldModel->update($existingData['Id'], ['Gambar_Mold' => $gambarmold]);
+                    // Hapus file gambar lama jika ada
+                    $oldImagePath = ROOTPATH . 'public/uploads/' . $existingData['Gambar_Mold'];
+                    if (!empty($existingData['Gambar_Mold']) && file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
 
-
-                $datamold = [
-                    'User_ID' => $this->request->getPost('user_id'),
-                    'Mold_Id' => $this->request->getPost('moldIdContent'),
-                    'Part_Name' => $this->request->getPost('partname'),
-                    'Gambar_Mold' =>  $gambarmold
-                    // 'Gambar_Part' => $gambarpart,
-                    // 'Gambar_Runner' => $gambarRunner,
-                    // 'Drawing_Produk' => $drawingname
-                ];
-
-                $moldModel->save($datamold);
-
-
-
-                return $this->response->setJSON(['message' => 'Data submitted successfully!']);
+                    // Perbarui data gambar pada baris yang ada
+                    
+                    $gambar_mold->move(ROOTPATH . 'public/uploads', $gambarmold);
+                    return $this->response->setJSON(['message' => 'Data updated successfully!']);
+                } else {
+                    // Tambahkan data baru jika tidak ada
+                    $gambar_mold->move(ROOTPATH . 'public/uploads', $gambarmold);
+                    $datamold = [
+                        'User_ID' => $this->request->getPost('user_id'),
+                        'Mold_Id' => $moldId,
+                        'Part_Name' => $this->request->getPost('partname'),
+                        'Gambar_Mold' => $gambarmold
+                    ];
+                    $moldModel->save($datamold);
+                    return $this->response->setJSON(['message' => 'Data submitted successfully!']);
+                }
             } else {
-                // File tidak valid atau bukan file PDF
+                // File tidak valid
                 return $this->response->setJSON(['error' => 'Invalid or non-PDF file uploaded!']);
             }
         } catch (\Exception $e) {
             return $this->response->setJSON(['error' => 'Error: ' . $e->getMessage()]);
         }
     }
+
+
+
     public function update_data_mold()
     {
         // if (!session()->has('admin_nama')) {
