@@ -72,25 +72,51 @@ class MoldItemModel extends Model
         return $this->db->table('mold_item')->countAllResults();
     }
 
+    //backup
+    // public function getItemBySupplier($supplier2)
+    // {
+    //     $suplierModel = new SupplierModel();
+    //     //$latestYear = $suplierModel->getLatestYear();
+    //     $latestYear = 1;
+
+    //     if ($latestYear == 1) {
+    //         // Query kedua: Mencocokkan semua mold_name di tabel mold_item dan menampilkan suplier
+    //         $query = $this->db->query("
+    //         SELECT mi.ITEM, mi.NO, mi.MADE_IN, mi.STATUS, mi.MATERIAL, mi.DIMENSI_MOLD, s.suplier
+    //         FROM mold_item mi
+    //         JOIN suplier s ON mi.ITEM = s.mold_name
+    //         WHERE s.suplier = ?
+    //           AND s.tahun = (
+    //             SELECT MAX(tahun) 
+    //             FROM suplier 
+    //             WHERE suplier = ?
+    //           )
+    //     ", [$supplier2, $supplier2]);
+
+    //         $result = $query->getResultArray();
+    //         $totalData = count($result);
+
+    //         return [
+    //             'data' => $result,
+    //             'total' => $totalData
+    //         ];
+    //     }
+
+    //     return [
+    //         'data' => [],
+    //         'total' => 0
+    //     ];
+    // }
+
     public function getItemBySupplier($supplier2)
     {
-        $suplierModel = new SupplierModel();
-        //$latestYear = $suplierModel->getLatestYear();
-        $latestYear = 1;
-
-        if ($latestYear == 1) {
-            // Query kedua: Mencocokkan semua mold_name di tabel mold_item dan menampilkan suplier
+         // Query kedua: Mencocokkan semua mold_name di tabel mold_item dan menampilkan suplier
             $query = $this->db->query("
-            SELECT mi.ITEM, mi.NO, mi.MADE_IN, mi.STATUS, mi.MATERIAL, mi.DIMENSI_MOLD, s.suplier
-            FROM mold_item mi
-            JOIN suplier s ON mi.ITEM = s.mold_name
+            SELECT s.*, mi.*
+            FROM suplier s
+            JOIN mold_item mi ON s.mold_name = mi.ITEM
             WHERE s.suplier = ?
-              AND s.tahun = (
-                SELECT MAX(tahun) 
-                FROM suplier 
-                WHERE suplier = ?
-              )
-        ", [$supplier2, $supplier2]);
+        ", [$supplier2]);
 
             $result = $query->getResultArray();
             $totalData = count($result);
@@ -99,12 +125,7 @@ class MoldItemModel extends Model
                 'data' => $result,
                 'total' => $totalData
             ];
-        }
-
-        return [
-            'data' => [],
-            'total' => 0
-        ];
+       
     }
 
 
