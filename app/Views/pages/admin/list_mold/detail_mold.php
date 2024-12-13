@@ -40,8 +40,8 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold']); ?>">Dokumen 1</a>
-                                    <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold2']); ?>">Dokumen 2</a>
-                                    <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= base_url('uploads/' . $detail['dokumen_mold3']); ?>">Dokumen 3</a>
+                                    <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= $detail['dokumen_mold2'] ? base_url('uploads/' . $detail['dokumen_mold2']) : ''; ?>">Dokumen 2</a>
+                                    <a class="btn-pdf-modal dropdown-item active" data-pdf="<?= $detail['dokumen_mold3'] ? base_url('uploads/' . $detail['dokumen_mold3']) : ''; ?>">Dokumen 3</a>
                                     <a data-bs-toggle="modal" data-id-dokumen="<?= $detail['Id'] ?>" data-bs-target="#modal-update-dokumen" class="dropdown-item active bg-warning text-white">Ubah Dokumen</a>
                                 </div>
                             </li>
@@ -183,7 +183,7 @@
                                                     <td>Total Produksi</td>
                                                     <td><?= number_format($jumlah['jumlah_produk'], 0, ',', '.') ?> pcs</td>
                                                     <td>
-                                                        <form action="<?= base_url('export-excel/') ?><?= urlencode($moldData[0]['ITEM']) ?>"   method="get" style="display: inline;">
+                                                        <form action="<?= base_url('export-excel/') ?><?= urlencode($moldData[0]['ITEM']) ?>" method="get" style="display: inline;">
                                                             <button type="submit" class="btn btn-success text-white me-0">
                                                                 <span class="mdi mdi-file-excel-box"></span> Export Excel
                                                             </button>
@@ -268,18 +268,18 @@
 
                         <?php if (!empty($detail['Gambar_Mold'])) : ?>
                             <form id="upload_dokumen_mold">
-                                <input type="hidden" id="id_dokumen" name="id_mold" value="<?= $detail['Id']; ?>">
+                                <input type="hidden" id="id_mold" name="id_mold" value="<?= $detail['Id']; ?>">
                                 <div class="form-group">
                                     <label class="form-label">Dokumen Mold 1 :</label>
-                                    <input type="file" class="form-control" id="dokumen_mold">
+                                    <input type="file" class="form-control" name="dokumen_mold" id="dokumen_mold">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Dokumen Mold 2 :</label>
-                                    <input type="file" class="form-control" id="dokumen_mold2">
+                                    <input type="file" class="form-control" name="dokumen_mold2" id="dokumen_mold2">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Dokumen Mold 3 :</label>
-                                    <input type="file" class="form-control" id="dokumen_mold3">
+                                    <input type="file" class="form-control" name="dokumen_mold3" id="dokumen_mold3">
                                 </div>
                             </form>
                         <?php else : ?>
@@ -582,8 +582,16 @@
 
         $('.btn-pdf-modal').on('click', function() {
             var pdfUrl = $(this).data('pdf');
-            $('#pdfViewer').attr('src', pdfUrl);
-            $('#pdfModal').modal('show');
+
+            // Jika data-pdf kosong, tampilkan alert
+            if (!pdfUrl) {
+                alert('Dokumen ini belum tersedia!');
+            } else {
+                // Buka dokumen jika tersedia (misalnya di modal atau tab baru)
+                $('#pdfViewer').attr('src', pdfUrl);
+                $('#pdfModal').modal('show');
+            }
+
         });
 
         $('#product-image').on('click', function() {
@@ -682,13 +690,21 @@
             });
         });
         $('#save-button-dokumen').on('click', function() {
-
             var formData = new FormData();
-            formData.append('id', $('#id_dokumen').val());
-            formData.append('dokumen_mold', $('#dokumen_mold')[0].files[0]);
-            formData.append('dokumen_mold2', $('#dokumen_mold2')[0].files[0]);
-            formData.append('dokumen_mold3', $('#dokumen_mold3')[0].files[0]);
 
+            // Tambahkan ID mold
+            formData.append('id', $('#id_mold').val());
+
+            // Iterasi semua input file dalam form
+            $('#upload_dokumen_mold input[type="file"]').each(function(index, fileInput) {
+                var file = fileInput.files[0];
+                if (file) {
+                    // Tambahkan file ke FormData dengan nama unik
+                    formData.append(fileInput.name, file);
+                }
+            });
+
+            // Kirim data via AJAX
             $.ajax({
                 url: baseUrl + 'submit/dokumen',
                 type: 'POST',
@@ -698,7 +714,7 @@
                 success: function(response) {
                     if (response.hasOwnProperty('message')) {
                         $('#modalok').on('click', function() {
-                            location.reload(); // Redirect to the specified URL
+                            location.reload(); // Muat ulang halaman
                         });
                         showModal(response.message);
                     } else if (response.hasOwnProperty('error')) {
@@ -706,7 +722,6 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    // Display more detailed error message in the UI
                     var errorMessage = 'Error ' + xhr.status + ': ' + xhr.statusText;
                     if (xhr.responseText) {
                         errorMessage += ' - ' + xhr.responseText;
@@ -715,6 +730,7 @@
                 }
             });
         });
+
         $('#update-button-dokumen').on('click', function() {
 
             var formData = new FormData();

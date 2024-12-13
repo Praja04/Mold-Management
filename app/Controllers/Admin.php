@@ -935,7 +935,7 @@ class Admin extends BaseController
                 $dokumen_mold3name = $dokumen_mold3->getRandomName();
                 $dokumen_mold3->move(ROOTPATH . 'public/uploads', $dokumen_mold3name);
             } else {
-                return $this->response->setJSON(['error' => 'Dokumen Mold 3 harus diisi']);
+                return $this->response->setJSON(['error' => 'Dokumen Mold 3 harus diisi(boleh sama dengan dokumen lainnya)']);
             }
 
 
