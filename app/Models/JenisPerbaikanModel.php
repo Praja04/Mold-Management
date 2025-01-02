@@ -14,6 +14,7 @@ class JenisPerbaikanModel extends Model
   public function getjenisperbaikan()
   {
     return $this->select('jenis_perbaikan , val_jenis')
+    ->orderBy('val_jenis','ASC')
     ->findAll();
   }
 

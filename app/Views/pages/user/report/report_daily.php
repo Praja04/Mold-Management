@@ -353,7 +353,10 @@
                 'sinkmark',
                 'silver',
                 'flow_material',
-                'bushing'
+                'bushing',
+                'overcut',
+                'dirty',
+                'watermark'
             ];
 
             // Menyimpan nilai yang diisi

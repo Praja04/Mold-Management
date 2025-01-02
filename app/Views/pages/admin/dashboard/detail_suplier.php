@@ -353,10 +353,13 @@
                 success: function(response) {
                     if (response.message) {
                         // Show success message using SweetAlert2
-                        sweetalertChange(response.message);
-
+                        sweetalertChange(response.message, true);
+                        
                         // Optionally, close the modal after the success alert
                         $('#changePasswordModal').modal('hide');
+                    } else {
+                        $('#changePasswordModal').modal('hide');
+                        sweetalertChange(response.message, false);
                     }
                 },
                 error: function(xhr, status, error) {

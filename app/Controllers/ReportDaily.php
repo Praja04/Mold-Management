@@ -7,9 +7,10 @@ use App\Models\ReportModel;
 use App\Models\MoldItemModel;
 use App\Models\SupplierModel;
 use App\Models\TransaksiJumlahProduk;
-
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use CodeIgniter\Exceptions\PageNotFoundException;
-
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ReportDaily extends BaseController
 {
@@ -444,4 +445,227 @@ class ReportDaily extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete!']);
         }
     }
+
+    //report excel fitur
+    public function downloadTemplate()
+    {
+        $supplierModel = new SupplierModel();
+        $moldItemModel = new MoldItemModel();
+        $userSupplier = session()->get('user_suplier'); // Ambil suplier dari sesi pengguna
+
+        if (!$userSupplier) {
+            return redirect()->to('/dashboard')->with('error', 'Suplier tidak ditemukan.');
+        }
+
+        // Ambil mold_name berdasarkan suplier pengguna
+        $molds = $supplierModel->where('suplier', $userSupplier)->findAll();
+
+        if (!$molds) {
+            return redirect()->to('/dashboard')->with('error', 'Tidak ada mold untuk suplier ini.');
+        }
+
+        // Ambil mold yang aktif dari MoldItemModel berdasarkan mold_name dan STATUS = 'aktif'
+        $activeMolds = [];
+        foreach ($molds as $mold) {
+            $item = $moldItemModel->where('ITEM', $mold['mold_name'])->where('STATUS', 'ACTIVE')->first();
+            if ($item) {
+                $activeMolds[] = $item['ITEM'];
+                $idMolds[] = $item['NO'];
+            }
+        }
+
+        // Buat spreadsheet baru
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header kolom
+        $headers = [
+            'A' => 'Nama Mold',
+            'B' => 'Jumlah OK',
+            'C' => 'Material',
+            'D' => 'Problem Harian',
+            'E' => 'Setup Mesin',
+            'F' => 'Cuci Barel',
+            'G' => 'Cuci Mold',
+            'H' => 'Unfil',
+            'I' => 'Bubble',
+            'J' => 'Crack',
+            'K' => 'Blackdot',
+            'L' => 'Undercut',
+            'M' => 'Belang',
+            'N' => 'Scratch',
+            'O' => 'Ejector Mark',
+            'P' => 'Flashing',
+            'Q' => 'Bending',
+            'R' => 'Weldline',
+            'S' => 'Sinkmark',
+            'T' => 'Silver',
+            'U' => 'Flow Material',
+            'V' => 'Bushing',
+            'W' => 'Overcut',
+            'X' => 'Dirty',
+            'Y' => 'Watermark'
+            // 'W' => 'id mold',
+        ];
+
+        foreach ($headers as $column => $header) {
+            $sheet->setCellValue($column . '1', $header);
+        }
+
+        // Isi data nama mold yang aktif
+        $row = 2; // Mulai dari baris kedua
+        foreach ($activeMolds as $moldName) {
+            $sheet->setCellValue('A' . $row, $moldName); // Nama mold aktif
+            $row++;
+        }
+        // $rowid_mold =2;
+        // foreach ($idMolds as $idmold) {
+        //     $sheet->setCellValue('W' . $rowid_mold, $idmold); // Nama mold aktif
+        //     $rowid_mold++;
+        // }
+
+        // Set auto-size untuk semua kolom
+        foreach (array_keys($headers) as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Simpan file Excel
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'Template_Laporan_Mold.xlsx';
+
+        // Unduh file
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
+    }
+
+
+    public function uploadExcel()
+    {
+        $reportModel = new ReportModel();
+        $supplierModel = new SupplierModel();
+
+        // Ambil data suplier dari sesi
+        $userSuplier = session()->get('user_suplier');
+
+        if ($this->request->getFile('excel_file')->isValid()) {
+            $file = $this->request->getFile('excel_file');
+
+            try {
+                $spreadsheet = IOFactory::load($file->getTempName());
+                $sheet = $spreadsheet->getActiveSheet();
+                $rows = $sheet->toArray();
+
+                if (count($rows) > 1) {
+                    for ($i = 1; $i < count($rows); $i++) {
+                        $row = $rows[$i];
+
+                        if (!empty($row[0])) {
+                            $nama_mold = $row[0];
+
+                            // Cari suplier berdasarkan mold_name
+                            $supplier = $supplierModel->where('mold_name', $nama_mold)->first();
+
+                            if (!$supplier) {
+                                return $this->response->setJSON([
+                                    'status' => 'error',
+                                    'message' => "Mold dengan nama '$nama_mold' tidak ditemukan."
+                                ])->setStatusCode(400);
+                            }
+
+                            // Validasi apakah suplier sesuai dengan sesi pengguna
+                            if ($supplier['suplier'] !== $userSuplier) {
+                                return $this->response->setJSON([
+                                    'status' => 'error',
+                                    'message' => "Mold '$nama_mold' tidak sesuai dengan suplier Anda."
+                                ])->setStatusCode(403);
+                            }
+
+                            $id_mold = $supplier['id_mold'] ?? null;
+
+                            // Hitung jumlah_ng sebagai total semua nilai kolom terkait
+                            $jumlah_ng =
+                                ($row[4] ?? 0) + ($row[5] ?? 0) + ($row[6] ?? 0) +
+                                ($row[7] ?? 0) + ($row[8] ?? 0) + ($row[9] ?? 0) +
+                                ($row[10] ?? 0) + ($row[11] ?? 0) + ($row[12] ?? 0) +
+                                ($row[13] ?? 0) + ($row[14] ?? 0) + ($row[15] ?? 0) +
+                                ($row[16] ?? 0) + ($row[17] ?? 0) + ($row[18] ?? 0) +
+                                ($row[19] ?? 0) + ($row[20] ?? 0) + ($row[21] ?? 0);
+
+                            $jumlah_ok = $row[1] ?? 0;
+
+                            $data = [
+                                'id_mold'        => $id_mold,
+                                'nama_mold'      => $nama_mold,
+                                'jumlah_ok'      => $jumlah_ok,
+                                'jumlah_ng'      => $jumlah_ng,
+                                'material'       => $row[2] ?? '',
+                                'problem_harian' => $row[3] ?? '',
+                                'setup_mesin'    => $row[4] ?? 0,
+                                'cuci_barel'     => $row[5] ?? 0,
+                                'cuci_mold'      => $row[6] ?? 0,
+                                'unfil'          => $row[7] ?? 0,
+                                'bubble'         => $row[8] ?? 0,
+                                'crack'          => $row[9] ?? 0,
+                                'blackdot'       => $row[10] ?? 0,
+                                'undercut'       => $row[11] ?? 0,
+                                'belang'         => $row[12] ?? 0,
+                                'scratch'        => $row[13] ?? 0,
+                                'ejector_mark'   => $row[14] ?? 0,
+                                'flashing'       => $row[15] ?? 0,
+                                'bending'        => $row[16] ?? 0,
+                                'weldline'       => $row[17] ?? 0,
+                                'sinkmark'       => $row[18] ?? 0,
+                                'silver'         => $row[19] ?? 0,
+                                'flow_material'  => $row[20] ?? 0,
+                                'bushing'        => $row[21] ?? 0,
+                                'overcut'        => $row[22] ?? 0,
+                                'dirty'          => $row[23] ?? 0,
+                                'watermark'      => $row[24] ?? 0,
+                                'user_id'        => session()->get('user_id'),
+                                'tanggal_pengajuan' => date('Y-m-d'),
+                            ];
+
+                            $reportModel->insert($data);
+
+                            if ($id_mold) {
+                                $currentJumlahProduk = $supplier['jumlah_produk'] ?? 0;
+                                $newJumlahProduk = $currentJumlahProduk + $jumlah_ok;
+
+                                $supplierModel->update($supplier['id'], [
+                                    'jumlah_produk' => $newJumlahProduk
+                                ]);
+                            }
+                        }
+                    }
+
+                    return $this->response->setJSON([
+                        'status' => 'success',
+                        'message' => 'Data berhasil diunggah.'
+                    ]);
+                } else {
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'message' => 'File Excel kosong.'
+                    ])->setStatusCode(400);
+                }
+            } catch (\Exception $e) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal memproses file Excel.'
+                ])->setStatusCode(500);
+            }
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Gagal mengunggah file.'
+            ])->setStatusCode(400);
+        }
+    }
+
+
+
+
 }

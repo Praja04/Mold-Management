@@ -37,8 +37,11 @@ class ReportModel extends Model
         'silver',
         'flow_material',
         'bushing',
+        'overcut',
+        'dirty',
+        'watermark',
         'problem_harian',
-        'created_at'
+       
     ];
 
     public function getMoldDataWithSupplier($nama_mold)
