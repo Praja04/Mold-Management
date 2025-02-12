@@ -48,6 +48,7 @@ class PerbaikanBesar extends BaseController
             $gambar_rusak = $this->request->getFile('gambar_rusak');
             $nama_mold = $this->request->getPost('part_name');
             $kondisi_mold = $this->request->getPost('kondisi_perbaikan');
+            $nama_item = $this->request->getPost('nama_item');
             $suplier = $this->request->getPost('suplier');
             $keterangan = $this->request->getPost('keterangan') ?? 0;
             // Check if the file is valid and has been uploaded
@@ -66,56 +67,57 @@ class PerbaikanBesar extends BaseController
                 'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
                 'kondisi_mold' => $kondisi_mold,
                 'keterangan' => $keterangan,
-                'gambar_rusak' => $gambar_rusak_name
+                'gambar_rusak' => $gambar_rusak_name,
+                'nama_item' => $nama_item
             ];
 
             $perbaikan->save($data);
 
-            // Data untuk email
-            $penerima = $admin->select('name, email')->findAll();
-            $gambar_mold_rusak = 'https://portal3.incoe.astra.co.id/pce-mold-management/public/uploads/'. $gambar_rusak_name;
-            // URL API untuk mengirim email
-            $api_url = "https://portal2.incoe.astra.co.id/vendor_rating_infor/api/send_email_text";
+            // // Data untuk email
+            // $penerima = $admin->select('name, email')->findAll();
+            // $gambar_mold_rusak = 'https://portal3.incoe.astra.co.id/pce-mold-management/public/uploads/'. $gambar_rusak_name;
+            // // URL API untuk mengirim email
+            // $api_url = "https://portal2.incoe.astra.co.id/vendor_rating_infor/api/send_email_text";
 
-            foreach ($penerima as $person) {
-                $email_to = $person['email'];  // Mengambil email tiap admin
-                $nama_person = $person['name'];  // Mengambil nama tiap admin
+            // foreach ($penerima as $person) {
+            //     $email_to = $person['email'];  // Mengambil email tiap admin
+            //     $nama_person = $person['name'];  // Mengambil nama tiap admin
 
-                // Subjek dan pesan email
-                $email_subject = "Problem Mold CBI";
-                $email_message = "Halo " . $nama_person . ",\n\n" .
-                    "Kami menginformasikan bahwa ada kerusakan pada mold  " .  $nama_mold . ".\n" .
-                    "suplier : " . $suplier . ".\n\n" .
-                    "kondisi kerusakan mold : " . $kondisi_mold . ".\n\n" .
-                    "keterangan kerusakan mold : " . $keterangan . ".\n\n" .
-                    "gambar kerusakan mold : " .  $gambar_mold_rusak . ".\n\n" .
-                    "Cek keadaan mold pada link berikut https://portal3.incoe.astra.co.id/pce-mold-management/public/report/perbaikan/besar\n" .
-                    "Terima kasih,\n" . 
-                    "from PCE";
+            //     // Subjek dan pesan email
+            //     $email_subject = "Problem Mold CBI";
+            //     $email_message = "Halo " . $nama_person . ",\n\n" .
+            //         "Kami menginformasikan bahwa ada kerusakan pada mold  " .  $nama_mold . ".\n" .
+            //         "suplier : " . $suplier . ".\n\n" .
+            //         "kondisi kerusakan mold : " . $kondisi_mold . ".\n\n" .
+            //         "keterangan kerusakan mold : " . $keterangan . ".\n\n" .
+            //         "gambar kerusakan mold : " .  $gambar_mold_rusak . ".\n\n" .
+            //         "Cek keadaan mold pada link berikut https://portal3.incoe.astra.co.id/pce-mold-management/public/report/perbaikan/besar\n" .
+            //         "Terima kasih,\n" . 
+            //         "from PCE";
 
-                // Data yang akan dikirim ke API
-                $post_data = [
-                    'to' => $email_to,
-                    'cc' => '', // Kosongkan CC
-                    'subject' => $email_subject,
-                    'message' => $email_message
-                ];
+            //     // Data yang akan dikirim ke API
+            //     $post_data = [
+            //         'to' => $email_to,
+            //         'cc' => '', // Kosongkan CC
+            //         'subject' => $email_subject,
+            //         'message' => $email_message
+            //     ];
 
-                // Melakukan POST request ke API untuk setiap admin
-                $ch = curl_init($api_url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+            //     // Melakukan POST request ke API untuk setiap admin
+            //     $ch = curl_init($api_url);
+            //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            //     curl_setopt($ch, CURLOPT_POST, true);
+            //     curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
 
-                $response = curl_exec($ch);
-                $error = curl_error($ch);
-                curl_close($ch);
+            //     $response = curl_exec($ch);
+            //     $error = curl_error($ch);
+            //     curl_close($ch);
 
-                // Cek apakah ada error dalam pengiriman email
-                if ($error) {
-                    return $this->response->setJSON(['error' => 'Gagal mengirim email ke ' . $email_to . ': ' . $error]);
-                }
-            }
+            //     // Cek apakah ada error dalam pengiriman email
+            //     if ($error) {
+            //         return $this->response->setJSON(['error' => 'Gagal mengirim email ke ' . $email_to . ': ' . $error]);
+            //     }
+            //}
             return $this->response->setJSON(['message' => 'Data submitted successfully!']);
         } catch (\Exception $e) {
             log_message('error', 'Error in submit_perbaikan: ' . $e->getMessage());

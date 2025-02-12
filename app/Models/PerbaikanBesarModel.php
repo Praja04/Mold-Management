@@ -26,6 +26,7 @@ class PerbaikanBesarModel extends Model
         'dokumen_pendukung',
         'temporary',
         'permanen',
+        'nama_item',
         'created_at'
     ];
 
