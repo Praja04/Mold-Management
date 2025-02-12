@@ -20,6 +20,7 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Nama Mold</th>
+                                                <th>Bagian Mold</th>
                                                 <th>Suplier</th>
                                                 <th>Tanggal Pengajuan</th>
                                                 <th>Kondisi Mold</th>
@@ -36,6 +37,7 @@
                                                 <tr>
                                                     <td><?= $i++; ?></td>
                                                     <td><?= $user['nama_mold']; ?></td>
+                                                    <td><?= $user['nama_item'] ?? '-'; ?></td>
                                                     <td><?= $user['suplier']; ?></td>
                                                     <td><?= $user['tanggal_pengajuan']; ?></td>
                                                     <td><?= $user['kondisi_mold']; ?></td>

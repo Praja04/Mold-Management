@@ -65,6 +65,10 @@
                                     <h4 class="box-title text-info mb-0 mt-20"><i class="ti-save me-15"></i> Detail Problem</h4>
                                     <hr class="my-15">
                                     <div class="form-group">
+                                        <label class="form-label">Bagian Mold Yang Rusak</label>
+                                        <input type="text" class="form-control" id="nama_item" required>
+                                    </div>
+                                    <div class="form-group">
                                         <label class="form-label">Kondisi Sekarang</label>
                                         <input type="text" class="form-control" id="kondisi_perbaikan" required>
                                     </div>
@@ -202,6 +206,7 @@
             formData.append('part_name', $('#partname').val());
             formData.append('suplier', $('#suplier').val());
             formData.append('tanggal_pengajuan', $('#tanggal_perbaikan').val());
+            formData.append('nama_item', $('#nama_item').val());
             formData.append('kondisi_perbaikan', $('#kondisi_perbaikan').val());
             formData.append('keterangan', $('#keterangan').val());
             formData.append('gambar_rusak', $('#gambar_rusak')[0].files[0]);

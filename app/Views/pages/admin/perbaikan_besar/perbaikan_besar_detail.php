@@ -21,6 +21,7 @@
                                                 <th>No</th>
                                                 <th>Nama Mold</th>
                                                 <th>Suplier</th>
+                                                <th>Bagian Mold</th>
                                                 <th>Tanggal Pengajuan</th>
                                                 <th>Kondisi Mold</th>
                                                 <th>Gambar Rusak</th>
@@ -44,6 +45,7 @@
                                                     <td><?= $i++; ?></td>
                                                     <td><?= $user['nama_mold']; ?></td>
                                                     <td><?= $user['suplier']; ?></td>
+                                                    <td><?= $user['nama_item'] ?? '-'; ?></td>
                                                     <td><?= $user['tanggal_pengajuan']; ?></td>
                                                     <td><?= $user['kondisi_mold']; ?></td>
                                                     <td>
